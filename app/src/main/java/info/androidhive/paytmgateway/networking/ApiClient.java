@@ -16,7 +16,7 @@ public interface ApiClient {
 
     @FormUrlEncoded
     @POST("prepareOrder")
-    Call<PrepareOrderResponse> placeOrder(@FieldMap Map<String, String> params);
+    Call<PrepareOrderResponse> prepareOrder(@FieldMap Map<String, String> params);
 
     @POST("verifyChecksum")
     Call<Boolean> verifyChecksum();

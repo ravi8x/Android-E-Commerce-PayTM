@@ -10,6 +10,7 @@ import com.paytm.pgsdk.PaytmPaymentTransactionCallback;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         apiClient.getAppConfig().enqueue(new Callback<AppConfig>() {
             @Override
             public void onResponse(Call<AppConfig> call, Response<AppConfig> response) {
-                Timber.e("onResponse %s", response);
+                Timber.e("onResponse %s", response.body());
 
                 if (!response.isSuccessful()) {
                     // TODO - handle error
@@ -78,27 +79,29 @@ public class MainActivity extends AppCompatActivity {
         final Map<String, String> paramMap = new HashMap<String, String>();
 
         // these are mandatory parameters
-        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback");
+        // https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp
+
+        String orderId = generateOrderId();
+
+        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
         paramMap.put("CHANNEL_ID", config.getChannel());
-        paramMap.put("CUST_ID", "customer123");
+        paramMap.put("CUST_ID", generateOrderId());
         paramMap.put("INDUSTRY_TYPE_ID", config.getIndustryType());
         paramMap.put("MID", config.getMerchantId());
-        paramMap.put("TXN_AMOUNT", "50");
+        paramMap.put("TXN_AMOUNT", "10.00");
         paramMap.put("WEBSITE", config.getWebsite());
+        paramMap.put("ORDER_ID", orderId);
 
-        apiClient.placeOrder(paramMap).enqueue(new Callback<PrepareOrderResponse>() {
+        apiClient.prepareOrder(paramMap).enqueue(new Callback<PrepareOrderResponse>() {
             @Override
             public void onResponse(Call<PrepareOrderResponse> call, Response<PrepareOrderResponse> response) {
-                Timber.e("Checksum: " + response);
+                Timber.e("Checksum: " + response.body().getCheckSum());
                 if (!response.isSuccessful()) {
                     // TODO - handle error
                     return;
                 }
 
-                Timber.e("Placing order");
-
                 paramMap.put("CHECKSUMHASH", response.body().getCheckSum());
-                paramMap.put("ORDER_ID", response.body().getOrderId());
                 placeOrder(paramMap);
             }
 
@@ -111,31 +114,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void placeOrder(Map<String, String> params) {
-        Timber.d("onStartTransaction");
-
-        /*
-        paramMap.put("MID" , "WorldP64425807474247");
-        paramMap.put("ORDER_ID" , "210lkldfka2a27");
-        paramMap.put("CUST_ID" , "mkjNYC1227");
-        paramMap.put("INDUSTRY_TYPE_ID" , "Retail");
-        paramMap.put("CHANNEL_ID" , "WAP");
-        paramMap.put("TXN_AMOUNT" , "1");
-        paramMap.put("WEBSITE" , "worldpressplg");
-        paramMap.put("CALLBACK_URL" , "https://pguat.paytm.com/paytmchecksum/paytmCheckSumVerify.jsp");*/
-
+        Timber.d("onStartTransaction: %s", params.toString());
 
         // TODO - decide on staging or prod
         // PaytmPGService.getProductionService()
-        PaytmPGService Service = PaytmPGService.getStagingService();
+        PaytmPGService pgService = PaytmPGService.getStagingService();
         PaytmOrder Order = new PaytmOrder(params);
 
 		/*PaytmMerchant Merchant = new PaytmMerchant(
 				"https://pguat.paytm.com/paytmchecksum/paytmCheckSumGenerator.jsp",
 				"https://pguat.paytm.com/paytmchecksum/paytmCheckSumVerify.jsp");*/
 
-        Service.initialize(Order, null);
+        pgService.initialize(Order, null);
 
-        Service.startPaymentTransaction(this, true, true,
+        pgService.startPaymentTransaction(this, true, true,
                 new PaytmPaymentTransactionCallback() {
                     @Override
                     public void someUIErrorOccurred(String inErrorMessage) {
@@ -212,5 +204,9 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 });
+    }
+
+    private String generateOrderId() {
+        return UUID.randomUUID().toString();
     }
 }
