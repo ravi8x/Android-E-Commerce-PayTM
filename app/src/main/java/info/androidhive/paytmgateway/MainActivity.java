@@ -26,7 +26,8 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
     private PrefManager prefs;
-    ApiClient apiClient;
+    private ApiClient apiClient;
+    private String customerId = "CUSTOMER123POP9033";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,15 +83,29 @@ public class MainActivity extends AppCompatActivity {
         // https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp
 
         String orderId = generateOrderId();
+        //String orderId = "ORD7829385262";
 
-        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
-        paramMap.put("CHANNEL_ID", config.getChannel());
-        paramMap.put("CUST_ID", generateOrderId());
+        /*paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
+        paramMap.put("CHANNEL_ID", "WAP");
+        paramMap.put("CUST_ID", "CUST001");
+        paramMap.put("INDUSTRY_TYPE_ID", "Retail");
+        paramMap.put("MID", "Androi78288874845632");
+        paramMap.put("TXN_AMOUNT", "1.00");
+        paramMap.put("WEBSITE", "APPSTAGING");
+        paramMap.put("ORDER_ID", orderId);
+        paramMap.put("MOBILE_NO", "8179679983");
+        paramMap.put("EMAIL", "ravi@droid5.com");*/
+
+        paramMap.put("CALLBACK_URL",  "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
+        paramMap.put("CHANNEL_ID",  config.getChannel());
+        paramMap.put("CUST_ID", customerId);
         paramMap.put("INDUSTRY_TYPE_ID", config.getIndustryType());
         paramMap.put("MID", config.getMerchantId());
-        paramMap.put("TXN_AMOUNT", "10.00");
-        paramMap.put("WEBSITE", config.getWebsite());
+        paramMap.put("TXN_AMOUNT", "1.00");
+        paramMap.put("WEBSITE",  config.getWebsite());
         paramMap.put("ORDER_ID", orderId);
+        paramMap.put("MOBILE_NO", "7777777777");
+
 
         apiClient.prepareOrder(paramMap).enqueue(new Callback<PrepareOrderResponse>() {
             @Override
