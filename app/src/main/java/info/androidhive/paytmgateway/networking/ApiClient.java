@@ -1,9 +1,11 @@
 package info.androidhive.paytmgateway.networking;
 
+import java.util.List;
 import java.util.Map;
 
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
+import info.androidhive.paytmgateway.networking.model.Product;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -21,4 +23,6 @@ public interface ApiClient {
     @POST("verifyChecksum")
     Call<Boolean> verifyChecksum();
 
+    @GET("products")
+    Call<List<Product>> getProducts();
 }

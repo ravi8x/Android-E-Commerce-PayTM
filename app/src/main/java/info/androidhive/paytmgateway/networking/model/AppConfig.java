@@ -2,7 +2,13 @@ package info.androidhive.paytmgateway.networking.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class AppConfig {
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
+public class AppConfig extends RealmObject {
+    @PrimaryKey
+    int id = 0;
+
     @SerializedName("merchant_id")
     String merchantId;
 

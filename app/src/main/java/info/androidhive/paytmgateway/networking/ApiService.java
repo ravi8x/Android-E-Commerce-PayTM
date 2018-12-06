@@ -17,7 +17,6 @@ public class ApiService {
     private static int REQUEST_TIMEOUT = 15;
     private static OkHttpClient okHttpClient;
 
-
     public static Retrofit getClient() {
 
         if (okHttpClient == null)
@@ -43,16 +42,13 @@ public class ApiService {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         httpClient.addInterceptor(interceptor);
 
-        httpClient.addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Interceptor.Chain chain) throws IOException {
-                Request original = chain.request();
-                Request.Builder requestBuilder = original.newBuilder()
-                        .addHeader("Accept", "application/json");
+        httpClient.addInterceptor(chain -> {
+            Request original = chain.request();
+            Request.Builder requestBuilder = original.newBuilder()
+                    .addHeader("Accept", "application/json");
 
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
-            }
+            Request request = requestBuilder.build();
+            return chain.proceed(request);
         });
 
         okHttpClient = httpClient.build();
