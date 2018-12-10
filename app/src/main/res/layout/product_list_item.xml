@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/card_margin"
+        android:elevation="3dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/activity_margin">
+
+            <ImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/product_list_thumbnail" />
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif"
+                android:gravity="center_horizontal"
+                android:lineSpacingExtra="2sp"
+                android:maxLines="2"
+                android:textColor="@color/list_product_name"
+                android:textSize="@dimen/list_product_name"
+                android:textStyle="normal" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_margin">
+
+                <TextView
+                    android:id="@+id/price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:lineSpacingExtra="2sp"
+                    android:textColor="@color/list_products_price"
+                    android:textSize="14sp"
+                    android:textStyle="normal" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/ic_remove"
+                        android:layout_width="@dimen/ic_add_cart_width"
+                        android:layout_height="@dimen/ic_add_cart_width"
+                        android:src="@drawable/ic_remove" />
+
+                    <TextView
+                        android:id="@+id/product_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center_horizontal"
+                        android:lineSpacingExtra="2sp"
+                        android:paddingLeft="@dimen/activity_margin_half"
+                        android:paddingRight="@dimen/activity_margin_half"
+                        android:text="2"
+                        android:textColor="@color/selected_product_count"
+                        android:textSize="@dimen/selected_product_count"
+                        android:textStyle="normal" />
+
+                    <ImageView
+                        android:id="@+id/ic_add"
+                        android:layout_width="@dimen/ic_add_cart_width"
+                        android:layout_height="@dimen/ic_add_cart_width"
+                        android:src="@drawable/ic_add" />
+
+                </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>

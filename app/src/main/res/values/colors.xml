@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#ffffff</color>
     <color name="colorAccent">#ffe01b</color>
     <color name="colorGreen">#78ca28</color>
+    <color name="selected_product_count">#4d4d4d</color>
+    <color name="list_product_name">#121212</color>
+    <color name="list_products_price">#4d4d4d</color>
+    <color name="gradient_2">#3e3e3e</color>
 </resources>

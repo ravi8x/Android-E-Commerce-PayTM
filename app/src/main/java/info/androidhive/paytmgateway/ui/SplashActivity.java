@@ -3,7 +3,6 @@ package info.androidhive.paytmgateway.ui;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
@@ -11,20 +10,16 @@ import android.view.WindowManager;
 
 import java.util.List;
 
-import info.androidhive.paytmgateway.MainActivity;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
-import info.androidhive.paytmgateway.networking.ApiClient;
-import info.androidhive.paytmgateway.networking.ApiService;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.ui.main.MainActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
-public class SplashActivity extends AppCompatActivity {
-    private ApiClient apiService;
+public class SplashActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,19 +31,16 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         changeStatusBarColor();
 
-        apiService = ApiService.getClient().create(ApiClient.class);
-
         fetchAppConfig();
     }
 
     private void fetchAppConfig() {
-        Call<AppConfig> config = apiService.getAppConfig();
-        config.enqueue(new Callback<AppConfig>() {
+        Call<AppConfig> call = getApi().getAppConfig();
+        call.enqueue(new Callback<AppConfig>() {
             @Override
             public void onResponse(Call<AppConfig> call, Response<AppConfig> response) {
                 if (!response.isSuccessful()) {
-                    // TODO handle error
-                    Timber.e("Couldn't fetch app config!");
+                    handleError(null);
                     return;
                 }
 
@@ -61,19 +53,18 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<AppConfig> call, Throwable t) {
-                // TODO - handle error
+                handleError(t);
             }
         });
     }
 
     private void fetchProducts() {
-        Call<List<Product>> call = apiService.getProducts();
+        Call<List<Product>> call = getApi().getProducts();
         call.enqueue(new Callback<List<Product>>() {
             @Override
             public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
                 if (!response.isSuccessful()) {
-                    // TODO handle error
-                    Timber.e("Couldn't get products!");
+                    handleError(null);
                     return;
                 }
 
@@ -86,7 +77,7 @@ public class SplashActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<Product>> call, Throwable t) {
-                // TODO - handle error
+                handleError(t);
             }
         });
     }

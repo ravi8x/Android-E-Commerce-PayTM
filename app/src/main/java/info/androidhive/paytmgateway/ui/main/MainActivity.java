@@ -1,7 +1,14 @@
-package info.androidhive.paytmgateway;
+package info.androidhive.paytmgateway.ui.main;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
+import android.view.Menu;
+import android.view.View;
 import android.widget.Toast;
 
 import com.paytm.pgsdk.PaytmOrder;
@@ -12,22 +19,43 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
+import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.PrefManager;
+import info.androidhive.paytmgateway.db.AppDatabase;
+import info.androidhive.paytmgateway.db.model.Cart;
+import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
 import info.androidhive.paytmgateway.networking.ApiClient;
 import info.androidhive.paytmgateway.networking.ApiService;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
+import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.custom.CartInfoBar;
+import io.realm.ObjectChangeSet;
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmModel;
+import io.realm.RealmObjectChangeListener;
+import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity implements ProductsAdapter.ProductsAdapterListener {
+    @BindView(R.id.recycler_view)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.cart_info_bar)
+    CartInfoBar cartInfoBar;
+
     private PrefManager prefs;
     private ApiClient apiClient;
-    private String customerId = "CUSTOMER123POP9033";
+    private ProductsAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,10 +63,51 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        init();
+
         prefs = PrefManager.with(this);
         apiClient = ApiService.getClient().create(ApiClient.class);
 
-        fetchAppConfig();
+        renderProducts();
+        toggleCartBar(false);
+        clearCart();
+
+        Cart cart = Realm.getDefaultInstance().where(Cart.class).findFirst();
+        cart.addChangeListener(new RealmObjectChangeListener<Cart>() {
+            @Override
+            public void onChange(Cart realmModel, @Nullable ObjectChangeSet changeSet) {
+
+            }
+        });
+    }
+
+    private void clearCart() {
+        //AppDatabase.clearCart();
+    }
+
+    private void renderProducts() {
+        RealmResults<Product> products = AppDatabase.getProducts();
+        mAdapter = new ProductsAdapter(this, products, this);
+        recyclerView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
+
+        cartInfoBar.setData(6, "345");
+    }
+
+    private void init() {
+        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
     }
 
     private void fetchAppConfig() {
@@ -63,10 +132,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @OnClick(R.id.btn_pay)
-    void pay() {
-        getChecksum();
-    }
+    //@OnClick(R.id.btn_pay)
+    //void pay() {
+    //getChecksum();
+    //}
 
     void getChecksum() {
         AppConfig config = prefs.getAppConfig();
@@ -96,13 +165,13 @@ public class MainActivity extends AppCompatActivity {
         paramMap.put("MOBILE_NO", "8179679983");
         paramMap.put("EMAIL", "ravi@droid5.com");*/
 
-        paramMap.put("CALLBACK_URL",  "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
-        paramMap.put("CHANNEL_ID",  config.getChannel());
-        paramMap.put("CUST_ID", customerId);
+        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + orderId);
+        paramMap.put("CHANNEL_ID", config.getChannel());
+        //paramMap.put("CUST_ID", customerId);
         paramMap.put("INDUSTRY_TYPE_ID", config.getIndustryType());
         paramMap.put("MID", config.getMerchantId());
         paramMap.put("TXN_AMOUNT", "1.00");
-        paramMap.put("WEBSITE",  config.getWebsite());
+        paramMap.put("WEBSITE", config.getWebsite());
         paramMap.put("ORDER_ID", orderId);
         paramMap.put("MOBILE_NO", "7777777777");
 
@@ -223,5 +292,27 @@ public class MainActivity extends AppCompatActivity {
 
     private String generateOrderId() {
         return UUID.randomUUID().toString();
+    }
+
+    private int dpToPx(int dp) {
+        Resources r = getResources();
+        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
+
+    @Override
+    public void onProductAddedCart(Product product) {
+        AppDatabase.addItemToCart(product);
+    }
+
+    @Override
+    public void onProductRemovedFromCart(Product product) {
+
+    }
+
+    private void toggleCartBar(boolean show) {
+        if (show)
+            cartInfoBar.setVisibility(View.VISIBLE);
+        else
+            cartInfoBar.setVisibility(View.GONE);
     }
 }

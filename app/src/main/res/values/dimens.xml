@@ -2,4 +2,12 @@
 <resources>
     <dimen name="dimen_30">30dp</dimen>
     <dimen name="activity_margin">16dp</dimen>
+    <dimen name="card_margin">5dp</dimen>
+    <dimen name="card_album_radius">4dp</dimen>
+    <dimen name="product_list_thumbnail">116dp</dimen>
+    <dimen name="ic_add_cart_width">25dp</dimen>
+    <dimen name="selected_product_count">14sp</dimen>
+    <dimen name="list_product_name">14sp</dimen>
+    <dimen name="activity_margin_half">8dp</dimen>
+    <dimen name="cart_info_data">16sp</dimen>
 </resources>

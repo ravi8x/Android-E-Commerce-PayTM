@@ -42,6 +42,8 @@ public class ApiService {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         httpClient.addInterceptor(interceptor);
 
+        // TODO - add no internet connection interceptor
+
         httpClient.addInterceptor(chain -> {
             Request original = chain.request();
             Request.Builder requestBuilder = original.newBuilder()
