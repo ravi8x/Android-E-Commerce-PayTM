@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/transactions"
+        android:icon="@drawable/baseline_format_list_bulleted_black_18"
+        android:title="@string/clear_cart"
+        app:showAsAction="always" />
+
+
     <item
         android:id="@+id/refresh"
         android:title="@string/refresh" />

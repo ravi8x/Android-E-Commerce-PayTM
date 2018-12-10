@@ -1,5 +1,6 @@
 package info.androidhive.paytmgateway.ui.main;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -8,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -19,14 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.PrefManager;
 import info.androidhive.paytmgateway.db.AppDatabase;
-import info.androidhive.paytmgateway.db.model.Cart;
 import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
 import info.androidhive.paytmgateway.networking.ApiClient;
 import info.androidhive.paytmgateway.networking.ApiService;
@@ -34,12 +33,9 @@ import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.networking.model.Product;
 import info.androidhive.paytmgateway.ui.BaseActivity;
-import info.androidhive.paytmgateway.ui.custom.CartInfoBar;
-import io.realm.ObjectChangeSet;
+import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
+import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmModel;
-import io.realm.RealmObjectChangeListener;
 import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,6 +52,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     private PrefManager prefs;
     private ApiClient apiClient;
     private ProductsAdapter mAdapter;
+    private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,16 +69,18 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         apiClient = ApiService.getClient().create(ApiClient.class);
 
         renderProducts();
-        toggleCartBar(false);
+        toggleCartBar(true);
         clearCart();
 
-        Cart cart = Realm.getDefaultInstance().where(Cart.class).findFirst();
+        realm = Realm.getDefaultInstance();
+
+        /*Cart cart = realm.where(Cart.class).findFirst();
         cart.addChangeListener(new RealmObjectChangeListener<Cart>() {
             @Override
             public void onChange(Cart realmModel, @Nullable ObjectChangeSet changeSet) {
 
             }
-        });
+        });*/
     }
 
     private void clearCart() {
@@ -108,6 +107,16 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.transactions) {
+            startActivity(new Intent(MainActivity.this, TransactionsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void fetchAppConfig() {

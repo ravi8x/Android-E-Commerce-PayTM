@@ -1,4 +1,4 @@
-package info.androidhive.paytmgateway.ui.custom;
+package info.androidhive.paytmgateway.ui.views;
 
 import android.content.Context;
 import android.support.annotation.Nullable;

@@ -5,4 +5,5 @@
     <string name="lbl_view_cart">VIEW CART</string>
     <string name="cart_info_bar_data">%d Items | ₹%s</string>
     <string name="clear_cart">Clear Cart</string>
+    <string name="title_activity_transactions">Transactions</string>
 </resources>

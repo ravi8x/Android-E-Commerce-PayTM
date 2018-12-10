@@ -10,4 +10,5 @@
     <dimen name="list_product_name">14sp</dimen>
     <dimen name="activity_margin_half">8dp</dimen>
     <dimen name="cart_info_data">16sp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
