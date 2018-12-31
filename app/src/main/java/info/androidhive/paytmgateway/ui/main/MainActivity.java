@@ -26,6 +26,8 @@ import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.PrefManager;
 import info.androidhive.paytmgateway.db.AppDatabase;
+import info.androidhive.paytmgateway.db.model.Cart;
+import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
 import info.androidhive.paytmgateway.networking.ApiClient;
 import info.androidhive.paytmgateway.networking.ApiService;
@@ -36,6 +38,8 @@ import info.androidhive.paytmgateway.ui.BaseActivity;
 import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
 import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -53,6 +57,8 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     private ApiClient apiClient;
     private ProductsAdapter mAdapter;
     private Realm realm;
+    private RealmResults<Cart> cart;
+    private RealmChangeListener<RealmResults<Cart>> cartRealmChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,18 +79,38 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         clearCart();
 
         realm = Realm.getDefaultInstance();
+        cart = realm.where(Cart.class).findAll();
 
-        /*Cart cart = realm.where(Cart.class).findFirst();
-        cart.addChangeListener(new RealmObjectChangeListener<Cart>() {
-            @Override
-            public void onChange(Cart realmModel, @Nullable ObjectChangeSet changeSet) {
-
+        cartRealmChangeListener = cart -> {
+            Timber.e("cart changed! " + cart.size());
+            if (cart != null && cart.get(0).cartItems.size() > 0) {
+                mAdapter.setCart(cart.get(0));
+                setCartInfoBar(cart.get(0));
+                toggleCartBar(true);
+            } else {
+                toggleCartBar(false);
             }
-        });*/
+        };
+    }
+
+    private void setCartInfoBar(Cart cart) {
+        int itemCount = 0;
+        for (CartItem cartItem : cart.cartItems) {
+            itemCount += cartItem.quantity;
+        }
+        cartInfoBar.setData(itemCount, String.valueOf(getCartPrice(cart.cartItems)));
+    }
+
+    private float getCartPrice(RealmList<CartItem> cartItems) {
+        float price = 0f;
+        for (CartItem item : cartItems) {
+            price += item.product.price * item.quantity;
+        }
+        return price;
     }
 
     private void clearCart() {
-        //AppDatabase.clearCart();
+        AppDatabase.clearCart();
     }
 
     private void renderProducts() {
@@ -92,8 +118,6 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         mAdapter = new ProductsAdapter(this, products, this);
         recyclerView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
-
-        cartInfoBar.setData(6, "345");
     }
 
     private void init() {
@@ -309,13 +333,19 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     }
 
     @Override
-    public void onProductAddedCart(Product product) {
+    public void onProductAddedCart(int index, Product product) {
         AppDatabase.addItemToCart(product);
+        if (cart != null) {
+            mAdapter.updateItem(index, cart.get(0));
+        }
     }
 
     @Override
-    public void onProductRemovedFromCart(Product product) {
-
+    public void onProductRemovedFromCart(int index, Product product) {
+        AppDatabase.removeCartItem(product);
+        if (cart != null) {
+            mAdapter.updateItem(index, cart.get(0));
+        }
     }
 
     private void toggleCartBar(boolean show) {
@@ -323,5 +353,21 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
             cartInfoBar.setVisibility(View.VISIBLE);
         else
             cartInfoBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (cart != null) {
+            cart.removeChangeListener(cartRealmChangeListener);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (cart != null) {
+            cart.addChangeListener(cartRealmChangeListener);
+        }
     }
 }

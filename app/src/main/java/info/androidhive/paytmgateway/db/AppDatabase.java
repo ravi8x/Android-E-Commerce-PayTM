@@ -1,6 +1,5 @@
 package info.androidhive.paytmgateway.db;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,9 +8,7 @@ import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
-import timber.log.Timber;
 
 public class AppDatabase {
     public AppDatabase() {
@@ -33,53 +30,70 @@ public class AppDatabase {
         return Realm.getDefaultInstance().where(Product.class).findAll();
     }
 
+    /**
+     * Adding product to cart
+     * Will create a new cart entry if there is no cart created yet
+     * Will increase the product quantity count if the item exists already
+     */
     public static void addItemToCart(Product product) {
-        Timber.e("addItemToCart: %d", product.id);
         Cart cart = getCart();
-
         if (cart == null) {
-            Timber.e("cart is null. Creating new one");
+            // no cart existed
+            initNewCart(product);
+        } else {
+            // cart already present
+            addProductToCart(cart, product);
+        }
+    }
+
+    private static void initNewCart(Product product) {
+        Realm.getDefaultInstance().executeTransaction(realm -> {
+            List<CartItem> cartItems;
+            Cart cart1 = realm.createObject(Cart.class, 0);
+            CartItem cartItem = new CartItem();
+            cartItem.product = product;
+            cartItem.quantity += 1;
+            cartItems = new ArrayList<>();
+            cartItems.add(cartItem);
+            cart1.cartItems.addAll(cartItems);
+            realm.copyToRealmOrUpdate(cart1);
+        });
+    }
+
+    private static void addProductToCart(Cart cart, Product product) {
+        CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
+        if (item != null) {
             Realm.getDefaultInstance().executeTransaction(realm -> {
-                List<CartItem> cartItems;
-                Cart cart1 = realm.createObject(Cart.class, 0);
-                CartItem cartItem = new CartItem();
-                cartItem.product = product;
-                cartItem.quantity += 1;
-                cartItems = new ArrayList<>();
-                cartItems.add(cartItem);
-                cart1.cartItems.addAll(cartItems);
-
-                Timber.e("Cart1: %s", cart1);
-
-                realm.copyToRealmOrUpdate(cart1);
+                item.quantity += 1;
+                cart.cartItems.set(cart.cartItems.indexOf(item), item);
+                realm.copyToRealmOrUpdate(cart);
             });
         } else {
-            // existed cart is present
-            Timber.e("cart items size: %d", cart.cartItems.size());
-            CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
-            if (item != null) {
-                Timber.e("cart item found: %s", item);
-                Realm.getDefaultInstance().executeTransaction(realm -> {
-                    item.quantity += 1;
-                    cart.cartItems.set(cart.cartItems.indexOf(item), item);
-                    realm.copyToRealmOrUpdate(cart);
-                });
-
-            } else {
-                Timber.e("cart item null. Creating new one");
-                CartItem cartItem = new CartItem();
-                cartItem.product = product;
-                cartItem.quantity += 1;
-                Realm.getDefaultInstance().executeTransaction(realm -> {
-                    cart.cartItems.add(cartItem);
-                    realm.copyToRealmOrUpdate(cart);
-                });
-            }
+            CartItem cartItem = new CartItem();
+            cartItem.product = product;
+            cartItem.quantity += 1;
+            Realm.getDefaultInstance().executeTransaction(realm -> {
+                cart.cartItems.add(cartItem);
+                realm.copyToRealmOrUpdate(cart);
+            });
         }
     }
 
     public static void removeCartItem(Product product) {
-
+        Cart cart = getCart();
+        CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
+        if (item != null) {
+            Realm.getDefaultInstance().executeTransaction(realm -> {
+                // if the quantity is 1, remove the item
+                if (item.quantity == 1) {
+                    cart.cartItems.remove(cart.cartItems.indexOf(item));
+                } else {
+                    item.quantity -= 1;
+                    cart.cartItems.set(cart.cartItems.indexOf(item), item);
+                }
+                realm.copyToRealmOrUpdate(cart);
+            });
+        }
     }
 
     public static Cart getCart() {

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.textservice.TextInfo;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,14 +13,18 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.GlideApp;
+import info.androidhive.paytmgateway.db.model.Cart;
+import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.Product;
 import io.realm.RealmResults;
+import timber.log.Timber;
 
 public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyViewHolder> {
 
     private Context context;
     private RealmResults<Product> products;
     private ProductsAdapterListener listener;
+    private Cart cart;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.name)
@@ -37,6 +42,9 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
         @BindView(R.id.ic_remove)
         ImageView icRemove;
 
+        @BindView(R.id.product_count)
+        TextView lblQuantity;
+
         public MyViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
@@ -48,6 +56,10 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
         this.context = context;
         this.products = products;
         this.listener = listener;
+    }
+
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 
     @Override
@@ -66,12 +78,32 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
         GlideApp.with(context).load(product.imageUrl).into(holder.thumbnail);
 
         holder.icAdd.setOnClickListener(view -> {
-            listener.onProductAddedCart(product);
+            listener.onProductAddedCart(position, product);
         });
 
         holder.icRemove.setOnClickListener(view -> {
-            listener.onProductRemovedFromCart(product);
+            listener.onProductRemovedFromCart(position, product);
         });
+
+        if (cart != null) {
+            CartItem cartItem = cart.cartItems.where().equalTo("product.id", products.get(position).id).findFirst();
+            if (cartItem != null) {
+                Timber.e("product quantity: %d", cartItem.quantity);
+                if (cartItem.quantity > 0) {
+                    holder.lblQuantity.setText(String.valueOf(cartItem.quantity));
+                    holder.icRemove.setVisibility(View.VISIBLE);
+                    holder.lblQuantity.setVisibility(View.VISIBLE);
+                } else {
+                    holder.icRemove.setVisibility(View.GONE);
+                    holder.lblQuantity.setVisibility(View.GONE);
+                }
+            }else {
+                holder.lblQuantity.setText(String.valueOf(0));
+                holder.icRemove.setVisibility(View.GONE);
+                holder.lblQuantity.setVisibility(View.GONE);
+            }
+        }
+
     }
 
     @Override
@@ -79,9 +111,14 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
         return products.size();
     }
 
-    public interface ProductsAdapterListener {
-        void onProductAddedCart(Product product);
+    public void updateItem(int position, Cart cart) {
+        this.cart = cart;
+        notifyItemChanged(position);
+    }
 
-        void onProductRemovedFromCart(Product product);
+    public interface ProductsAdapterListener {
+        void onProductAddedCart(int index, Product product);
+
+        void onProductRemovedFromCart(int index, Product product);
     }
 }
