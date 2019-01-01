@@ -23,18 +23,21 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.PrefManager;
 import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.model.Cart;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
+import info.androidhive.paytmgateway.helper.Utils;
 import info.androidhive.paytmgateway.networking.ApiClient;
 import info.androidhive.paytmgateway.networking.ApiService;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.networking.model.Product;
 import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.cart.CartBottomSheetFragment;
 import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
 import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
@@ -65,17 +68,12 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         init();
 
-        prefs = PrefManager.with(this);
-        apiClient = ApiService.getClient().create(ApiClient.class);
-
         renderProducts();
-        toggleCartBar(true);
         clearCart();
 
         realm = Realm.getDefaultInstance();
@@ -98,19 +96,11 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         for (CartItem cartItem : cart.cartItems) {
             itemCount += cartItem.quantity;
         }
-        cartInfoBar.setData(itemCount, String.valueOf(getCartPrice(cart.cartItems)));
-    }
-
-    private float getCartPrice(RealmList<CartItem> cartItems) {
-        float price = 0f;
-        for (CartItem item : cartItems) {
-            price += item.product.price * item.quantity;
-        }
-        return price;
+        cartInfoBar.setData(itemCount, String.valueOf(Utils.getCartPrice(cart.cartItems)));
     }
 
     private void clearCart() {
-        AppDatabase.clearCart();
+        // AppDatabase.clearCart();
     }
 
     private void renderProducts() {
@@ -121,10 +111,20 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     }
 
     private void init() {
+        prefs = PrefManager.with(this);
+        apiClient = ApiService.getClient().create(ApiClient.class);
+
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        cartInfoBar.setListener(new CartInfoBar.CartInfoBarListener() {
+            @Override
+            public void onClick() {
+                showCart();
+            }
+        });
     }
 
     @Override
@@ -141,6 +141,11 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    void showCart() {
+        CartBottomSheetFragment fragment = new CartBottomSheetFragment();
+        fragment.show(getSupportFragmentManager(), fragment.getTag());
     }
 
     private void fetchAppConfig() {
@@ -368,6 +373,14 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         super.onResume();
         if (cart != null) {
             cart.addChangeListener(cartRealmChangeListener);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (realm != null) {
+            realm.close();
         }
     }
 }

@@ -11,4 +11,8 @@
     <dimen name="activity_margin_half">8dp</dimen>
     <dimen name="cart_info_data">16sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="height_separator">1dp</dimen>
+    <dimen name="corner_radius_bottom_sheet">8dp</dimen>
+    <dimen name="corner_radius_remove_item">3dp</dimen>
+    <dimen name="btn_remove_item">24dp</dimen>
 </resources>

@@ -1,0 +1,135 @@
+package info.androidhive.paytmgateway.ui.cart;
+
+
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import info.androidhive.paytmgateway.R;
+import info.androidhive.paytmgateway.db.AppDatabase;
+import info.androidhive.paytmgateway.db.model.Cart;
+import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
+import info.androidhive.paytmgateway.helper.Utils;
+import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.ui.main.ProductsAdapter;
+import info.androidhive.paytmgateway.ui.views.CartInfoBar;
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
+import io.realm.RealmResults;
+import timber.log.Timber;
+
+public class CartBottomSheetFragment extends BottomSheetDialogFragment implements CartProductsAdapter.CartProductsAdapterListener {
+
+    @BindView(R.id.recycler_view)
+    RecyclerView recyclerView;
+
+    @BindView(R.id.btn_checkout)
+    Button btnCheckout;
+
+    private Realm realm;
+    // private RealmResults<Cart> cart;
+    private Cart cart;
+    // private RealmChangeListener<RealmResults<Cart>> cartRealmChangeListener;
+    private CartProductsAdapter mAdapter;
+
+    public CartBottomSheetFragment() {
+        // Required empty public constructor
+    }
+
+    public static CartBottomSheetFragment newInstance(String param1, String param2) {
+        CartBottomSheetFragment fragment = new CartBottomSheetFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_cart_bottom_sheet, container, false);
+        ButterKnife.bind(this, view);
+
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        realm = Realm.getDefaultInstance();
+        cart = realm.where(Cart.class).findFirst();
+        init();
+    }
+
+    private void init() {
+        mAdapter = new CartProductsAdapter(getActivity(), this);
+        mAdapter.setCart(cart);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+        recyclerView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
+        setTotalPrice();
+
+        /*cartRealmChangeListener = cart -> {
+            if (cart != null && cart.get(0).cartItems.size() > 0) {
+                mAdapter.setCart(cart.get(0));
+            }
+        };
+
+        if (cart != null) {
+            cart.addChangeListener(cartRealmChangeListener);
+        }*/
+    }
+
+    private void setTotalPrice() {
+        if (cart != null) {
+            btnCheckout.setText(getString(R.string.btn_checkout, getString(R.string.price_with_currency, Utils.getCartPrice(cart.cartItems))));
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (cart != null) {
+            // cart.addChangeListener(cartRealmChangeListener);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (cart != null) {
+            // cart.removeChangeListener(cartRealmChangeListener);
+        }
+
+        if (realm != null) {
+            realm.close();
+        }
+    }
+
+    @Override
+    public void onProductRemoved(Product product) {
+
+    }
+}

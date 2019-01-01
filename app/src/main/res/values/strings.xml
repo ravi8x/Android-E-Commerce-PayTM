@@ -6,4 +6,9 @@
     <string name="cart_info_bar_data">%d Items | ₹%s</string>
     <string name="clear_cart">Clear Cart</string>
     <string name="title_activity_transactions">Transactions</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="btn_checkout">CHECKOUT (%s)</string>
+    <string name="lbl_item_price_quantity">%s x %d</string>
 </resources>
