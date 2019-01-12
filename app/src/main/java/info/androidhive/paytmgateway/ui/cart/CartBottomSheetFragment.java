@@ -1,35 +1,34 @@
 package info.androidhive.paytmgateway.ui.cart;
 
 
+import android.app.Dialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.BottomSheetDialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.model.Cart;
-import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
+import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.Utils;
-import info.androidhive.paytmgateway.networking.model.Product;
-import info.androidhive.paytmgateway.ui.main.ProductsAdapter;
-import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import timber.log.Timber;
 
 public class CartBottomSheetFragment extends BottomSheetDialogFragment implements CartProductsAdapter.CartProductsAdapterListener {
 
@@ -41,12 +40,20 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
 
     private Realm realm;
     // private RealmResults<Cart> cart;
-    private Cart cart;
+    // private Cart cart;
     // private RealmChangeListener<RealmResults<Cart>> cartRealmChangeListener;
     private CartProductsAdapter mAdapter;
+    private CartBottomSheetFragmentListener listener;
+
+    private RealmResults<CartItem> cartItems;
+    private RealmChangeListener<RealmResults<CartItem>> cartItemRealmChangeListener;
 
     public CartBottomSheetFragment() {
         // Required empty public constructor
+    }
+
+    public void setListener(CartBottomSheetFragmentListener listener) {
+        this.listener = listener;
     }
 
     public static CartBottomSheetFragment newInstance(String param1, String param2) {
@@ -54,6 +61,21 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+        BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
+
+        dialog.setOnShowListener(dialog1 -> {
+            BottomSheetDialog d = (BottomSheetDialog) dialog1;
+
+            FrameLayout bottomSheet = d.findViewById(android.support.design.R.id.design_bottom_sheet);
+            BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+        });
+        return dialog;
     }
 
     @Override
@@ -67,6 +89,12 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_cart_bottom_sheet, container, false);
         ButterKnife.bind(this, view);
+        realm = Realm.getDefaultInstance();
+        cartItems = realm.where(CartItem.class).findAllAsync();
+
+        cartItemRealmChangeListener = cartItems -> mAdapter.setData(cartItems);
+
+        cartItems.addChangeListener(cartItemRealmChangeListener);
 
         return view;
     }
@@ -75,14 +103,14 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        realm = Realm.getDefaultInstance();
-        cart = realm.where(Cart.class).findFirst();
+        // realm = Realm.getDefaultInstance();
+        // cart = realm.where(Cart.class).findAll();
+        // cartItems = realm.where(Cart.class).findAll();
         init();
     }
 
     private void init() {
         mAdapter = new CartProductsAdapter(getActivity(), this);
-        mAdapter.setCart(cart);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -103,6 +131,7 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     }
 
     private void setTotalPrice() {
+        Cart cart = realm.where(Cart.class).findFirst();
         if (cart != null) {
             btnCheckout.setText(getString(R.string.btn_checkout, getString(R.string.price_with_currency, Utils.getCartPrice(cart.cartItems))));
         }
@@ -111,16 +140,13 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     @Override
     public void onResume() {
         super.onResume();
-        if (cart != null) {
-            // cart.addChangeListener(cartRealmChangeListener);
-        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (cart != null) {
-            // cart.removeChangeListener(cartRealmChangeListener);
+        if (cartItems != null) {
+            cartItems.removeChangeListener(cartItemRealmChangeListener);
         }
 
         if (realm != null) {
@@ -128,8 +154,17 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         }
     }
 
-    @Override
-    public void onProductRemoved(Product product) {
+    @OnClick(R.id.ic_close)
+    void onCloseClick() {
+        dismiss();
+    }
 
+    @Override
+    public void onCartItemRemoved(int index, CartItem cartItem) {
+        AppDatabase.removeCartItem(cartItem);
+    }
+
+    public interface CartBottomSheetFragmentListener {
+        void onCartItemRemoved(int index, CartItem cartItem);
     }
 }

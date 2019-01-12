@@ -23,7 +23,6 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.PrefManager;
 import info.androidhive.paytmgateway.db.AppDatabase;
@@ -42,7 +41,6 @@ import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
 import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,7 +70,6 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         setSupportActionBar(toolbar);
 
         init();
-
         renderProducts();
         clearCart();
 
@@ -81,7 +78,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
 
         cartRealmChangeListener = cart -> {
             Timber.e("cart changed! " + cart.size());
-            if (cart != null && cart.get(0).cartItems.size() > 0) {
+            if (cart != null && cart.size() > 0 && cart.get(0).cartItems.size() > 0) {
                 mAdapter.setCart(cart.get(0));
                 setCartInfoBar(cart.get(0));
                 toggleCartBar(true);
@@ -119,12 +116,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        cartInfoBar.setListener(new CartInfoBar.CartInfoBarListener() {
-            @Override
-            public void onClick() {
-                showCart();
-            }
-        });
+        cartInfoBar.setListener(() -> showCart());
     }
 
     @Override
@@ -140,11 +132,18 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
             return true;
         }
 
+        if (item.getItemId() == R.id.clear_cart) {
+            AppDatabase.clearCart();
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
     void showCart() {
         CartBottomSheetFragment fragment = new CartBottomSheetFragment();
+        fragment.setListener((index, cartItem) -> {
+
+        });
         fragment.show(getSupportFragmentManager(), fragment.getTag());
     }
 

@@ -8,7 +8,7 @@
     <color name="list_product_name">#121212</color>
     <color name="list_products_price">#4d4d4d</color>
     <color name="gradient_2">#3e3e3e</color>
-    <color name="bg_separator">#707070</color>
+    <color name="bg_separator">#DA707070</color>
     <color name="border_remove_item">#fc9898</color>
     <color name="btn_remove_item">#fc2222</color>
 </resources>

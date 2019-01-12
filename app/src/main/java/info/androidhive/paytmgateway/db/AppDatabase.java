@@ -96,11 +96,27 @@ public class AppDatabase {
         }
     }
 
+    public static void removeCartItem(CartItem cartItem) {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Cart cart = Realm.getDefaultInstance().where(Cart.class).findFirst();
+                if (cart != null) {
+                    cart.cartItems.where().equalTo("product.id", cartItem.product.id).findFirst()
+                            .deleteFromRealm();
+                }
+            }
+        });
+    }
+
     public static Cart getCart() {
         return Realm.getDefaultInstance().where(Cart.class).findFirst();
     }
 
     public static void clearCart() {
-        Realm.getDefaultInstance().executeTransactionAsync(realm -> realm.delete(Cart.class));
+        Realm.getDefaultInstance().executeTransactionAsync(realm -> {
+            realm.delete(Cart.class);
+            realm.delete(CartItem.class);
+        });
     }
 }

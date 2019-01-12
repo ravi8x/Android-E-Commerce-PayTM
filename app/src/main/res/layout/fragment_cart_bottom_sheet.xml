@@ -17,11 +17,12 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:lineSpacingExtra="8sp"
-            android:text="Your Cart"
+            android:text="@string/lbl_your_cart"
             android:textColor="#4d4d4d"
             android:textSize="22sp" />
 
         <ImageView
+            android:id="@+id/ic_close"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/baseline_close_black_24"

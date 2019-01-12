@@ -9,20 +9,20 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.Collections;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.GlideApp;
-import info.androidhive.paytmgateway.db.model.Cart;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.Product;
-import io.realm.RealmResults;
-import timber.log.Timber;
 
 public class CartProductsAdapter extends RecyclerView.Adapter<CartProductsAdapter.MyViewHolder> {
 
     private Context context;
-    private Cart cart;
+    private List<CartItem> cartItems = Collections.emptyList();
     private CartProductsAdapterListener listener;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -50,8 +50,13 @@ public class CartProductsAdapter extends RecyclerView.Adapter<CartProductsAdapte
         this.listener = listener;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    public void setData(List<CartItem> cartItems) {
+        if (cartItems == null) {
+            this.cartItems = Collections.emptyList();
+        }
+
+        this.cartItems = cartItems;
+
         notifyDataSetChanged();
     }
 
@@ -65,25 +70,22 @@ public class CartProductsAdapter extends RecyclerView.Adapter<CartProductsAdapte
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        CartItem cartItem = cart.cartItems.get(position);
+        CartItem cartItem = cartItems.get(position);
         Product product = cartItem.product;
         holder.name.setText(product.name);
         holder.price.setText(holder.name.getContext().getString(R.string.lbl_item_price_quantity, context.getString(R.string.price_with_currency, product.price), cartItem.quantity));
         GlideApp.with(context).load(product.imageUrl).into(holder.thumbnail);
+
+        if (listener != null)
+            holder.btnRemove.setOnClickListener(view -> listener.onCartItemRemoved(position, cartItem));
     }
 
     @Override
     public int getItemCount() {
-        Timber.e("getItemCount: %d", (cart != null ? cart.cartItems.size() : 0));
-        return cart != null ? cart.cartItems.size() : 0;
-    }
-
-    public void updateItem(int position, Cart cart) {
-        this.cart = cart;
-        notifyItemChanged(position);
+        return cartItems.size();
     }
 
     public interface CartProductsAdapterListener {
-        void onProductRemoved(Product product);
+        void onCartItemRemoved(int index, CartItem cartItem);
     }
 }
