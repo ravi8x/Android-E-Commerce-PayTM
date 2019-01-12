@@ -23,7 +23,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
-import info.androidhive.paytmgateway.db.model.Cart;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.Utils;
 import io.realm.Realm;
@@ -92,7 +91,10 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         realm = Realm.getDefaultInstance();
         cartItems = realm.where(CartItem.class).findAllAsync();
 
-        cartItemRealmChangeListener = cartItems -> mAdapter.setData(cartItems);
+        cartItemRealmChangeListener = cartItems -> {
+            mAdapter.setData(cartItems);
+            setTotalPrice();
+        };
 
         cartItems.addChangeListener(cartItemRealmChangeListener);
 
@@ -131,9 +133,13 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     }
 
     private void setTotalPrice() {
-        Cart cart = realm.where(Cart.class).findFirst();
-        if (cart != null) {
-            btnCheckout.setText(getString(R.string.btn_checkout, getString(R.string.price_with_currency, Utils.getCartPrice(cart.cartItems))));
+        if (cartItems != null) {
+            float price = Utils.getCartPrice(cartItems);
+            if (price > 0) {
+                btnCheckout.setText(getString(R.string.btn_checkout, getString(R.string.price_with_currency, price)));
+            } else {
+                dismiss();
+            }
         }
     }
 

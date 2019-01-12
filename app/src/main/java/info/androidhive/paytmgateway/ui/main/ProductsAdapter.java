@@ -12,7 +12,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.GlideApp;
-import info.androidhive.paytmgateway.db.model.Cart;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.Product;
 import io.realm.RealmResults;
@@ -23,7 +22,7 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
     private Context context;
     private RealmResults<Product> products;
     private ProductsAdapterListener listener;
-    private Cart cart;
+    private RealmResults<CartItem> cartItems;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.name)
@@ -57,10 +56,6 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
         this.listener = listener;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
-    }
-
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
@@ -84,19 +79,15 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
             listener.onProductRemovedFromCart(position, product);
         });
 
-        if (cart != null) {
-            CartItem cartItem = cart.cartItems.where().equalTo("product.id", products.get(position).id).findFirst();
+        if (cartItems != null) {
+            Timber.e("cartItems:size: %d | product Id: %d", cartItems.size(), product.id);
+            CartItem cartItem = cartItems.where().equalTo("product.id", product.id).findFirst();
             if (cartItem != null) {
                 Timber.e("product quantity: %d", cartItem.quantity);
-                if (cartItem.quantity > 0) {
-                    holder.lblQuantity.setText(String.valueOf(cartItem.quantity));
-                    holder.icRemove.setVisibility(View.VISIBLE);
-                    holder.lblQuantity.setVisibility(View.VISIBLE);
-                } else {
-                    holder.icRemove.setVisibility(View.GONE);
-                    holder.lblQuantity.setVisibility(View.GONE);
-                }
-            }else {
+                holder.lblQuantity.setText(String.valueOf(cartItem.quantity));
+                holder.icRemove.setVisibility(View.VISIBLE);
+                holder.lblQuantity.setVisibility(View.VISIBLE);
+            } else {
                 holder.lblQuantity.setText(String.valueOf(0));
                 holder.icRemove.setVisibility(View.GONE);
                 holder.lblQuantity.setVisibility(View.GONE);
@@ -105,13 +96,19 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
 
     }
 
+    public void setCartItems(RealmResults<CartItem> cartItems) {
+        Timber.e("setCartItems: %s", cartItems);
+        this.cartItems = cartItems;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return products.size();
     }
 
-    public void updateItem(int position, Cart cart) {
-        this.cart = cart;
+    public void updateItem(int position, RealmResults<CartItem> cartItems) {
+        this.cartItems = cartItems;
         notifyItemChanged(position);
     }
 

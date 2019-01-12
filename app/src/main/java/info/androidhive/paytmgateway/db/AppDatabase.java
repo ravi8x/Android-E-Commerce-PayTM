@@ -3,7 +3,6 @@ package info.androidhive.paytmgateway.db;
 import java.util.ArrayList;
 import java.util.List;
 
-import info.androidhive.paytmgateway.db.model.Cart;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
@@ -36,18 +35,30 @@ public class AppDatabase {
      * Will increase the product quantity count if the item exists already
      */
     public static void addItemToCart(Product product) {
-        Cart cart = getCart();
+        initNewCart(product);
+        /*Cart cart = getCart();
         if (cart == null) {
             // no cart existed
             initNewCart(product);
         } else {
             // cart already present
             addProductToCart(cart, product);
-        }
+        }*/
     }
 
     private static void initNewCart(Product product) {
         Realm.getDefaultInstance().executeTransaction(realm -> {
+            CartItem cartItem = realm.where(CartItem.class).equalTo("product.id", product.id).findFirst();
+            if (cartItem == null) {
+                CartItem ci = new CartItem();
+                ci.product = product;
+                ci.quantity = 1;
+                realm.copyToRealmOrUpdate(ci);
+            } else {
+                cartItem.quantity += 1;
+                realm.copyToRealmOrUpdate(cartItem);
+            }
+            /*
             List<CartItem> cartItems;
             Cart cart1 = realm.createObject(Cart.class, 0);
             CartItem cartItem = new CartItem();
@@ -56,12 +67,13 @@ public class AppDatabase {
             cartItems = new ArrayList<>();
             cartItems.add(cartItem);
             cart1.cartItems.addAll(cartItems);
-            realm.copyToRealmOrUpdate(cart1);
+            realm.copyToRealmOrUpdate(cart1);*/
         });
     }
 
-    private static void addProductToCart(Cart cart, Product product) {
-        CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
+    private static void addProductToCart(Product product) {
+        initNewCart(product);
+        /*CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
         if (item != null) {
             Realm.getDefaultInstance().executeTransaction(realm -> {
                 item.quantity += 1;
@@ -76,11 +88,32 @@ public class AppDatabase {
                 cart.cartItems.add(cartItem);
                 realm.copyToRealmOrUpdate(cart);
             });
-        }
+        }*/
     }
 
     public static void removeCartItem(Product product) {
-        Cart cart = getCart();
+        Realm.getDefaultInstance().executeTransaction(realm -> {
+            CartItem cartItem = realm.where(CartItem.class).equalTo("product.id", product.id).findFirst();
+            if (cartItem != null) {
+                if (cartItem.quantity == 1) {
+                    cartItem.deleteFromRealm();
+                } else {
+                    cartItem.quantity -= 1;
+                    realm.copyToRealmOrUpdate(cartItem);
+                }
+            }
+            /*
+            List<CartItem> cartItems;
+            Cart cart1 = realm.createObject(Cart.class, 0);
+            CartItem cartItem = new CartItem();
+            cartItem.product = product;
+            cartItem.quantity += 1;
+            cartItems = new ArrayList<>();
+            cartItems.add(cartItem);
+            cart1.cartItems.addAll(cartItems);
+            realm.copyToRealmOrUpdate(cart1);*/
+        });
+        /*Cart cart = getCart();
         CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
         if (item != null) {
             Realm.getDefaultInstance().executeTransaction(realm -> {
@@ -93,30 +126,19 @@ public class AppDatabase {
                 }
                 realm.copyToRealmOrUpdate(cart);
             });
-        }
+        }*/
     }
 
     public static void removeCartItem(CartItem cartItem) {
         Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                Cart cart = Realm.getDefaultInstance().where(Cart.class).findFirst();
-                if (cart != null) {
-                    cart.cartItems.where().equalTo("product.id", cartItem.product.id).findFirst()
-                            .deleteFromRealm();
-                }
+                realm.where(CartItem.class).equalTo("product.id", cartItem.product.id).findAll().deleteAllFromRealm();
             }
         });
     }
 
-    public static Cart getCart() {
-        return Realm.getDefaultInstance().where(Cart.class).findFirst();
-    }
-
     public static void clearCart() {
-        Realm.getDefaultInstance().executeTransactionAsync(realm -> {
-            realm.delete(Cart.class);
-            realm.delete(CartItem.class);
-        });
+        Realm.getDefaultInstance().executeTransactionAsync(realm -> realm.delete(CartItem.class));
     }
 }
