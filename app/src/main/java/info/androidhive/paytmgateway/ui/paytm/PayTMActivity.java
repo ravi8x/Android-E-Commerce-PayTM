@@ -1,171 +1,118 @@
-package info.androidhive.paytmgateway.ui.main;
+package info.androidhive.paytmgateway.ui.paytm;
 
-import android.content.Intent;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.paytm.pgsdk.PaytmOrder;
 import com.paytm.pgsdk.PaytmPGService;
 import com.paytm.pgsdk.PaytmPaymentTransactionCallback;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
-import info.androidhive.paytmgateway.app.PrefManager;
-import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.model.CartItem;
-import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
-import info.androidhive.paytmgateway.helper.Utils;
-import info.androidhive.paytmgateway.networking.ApiClient;
-import info.androidhive.paytmgateway.networking.ApiService;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
+import info.androidhive.paytmgateway.networking.model.OrderItem;
+import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
-import info.androidhive.paytmgateway.networking.model.Product;
 import info.androidhive.paytmgateway.ui.BaseActivity;
-import info.androidhive.paytmgateway.ui.cart.CartBottomSheetFragment;
-import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
-import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import timber.log.Timber;
 
-public class MainActivity extends BaseActivity implements ProductsAdapter.ProductsAdapterListener {
-    @BindView(R.id.recycler_view)
-    RecyclerView recyclerView;
+public class PayTMActivity extends BaseActivity {
 
-    @BindView(R.id.cart_info_bar)
-    CartInfoBar cartInfoBar;
-
-    private PrefManager prefs;
-    private ApiClient apiClient;
-    private ProductsAdapter mAdapter;
     private Realm realm;
     private RealmResults<CartItem> cartItems;
-    private RealmChangeListener<RealmResults<CartItem>> cartRealmChangeListener;
+    private AppConfig appConfig;
+    private String orderId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_pay_tm);
         ButterKnife.bind(this);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setToolbar();
 
         init();
-        renderProducts();
-
-        realm = Realm.getDefaultInstance();
-        cartItems = realm.where(CartItem.class).findAllAsync();
-
-        cartRealmChangeListener = cartItems -> {
-            Timber.e("cartItems changed! " + this.cartItems.size());
-
-            for (CartItem c : cartItems) {
-                Timber.e("C: %s | %d", c.product.name, c.quantity);
-            }
-
-            if (cartItems != null && cartItems.size() > 0) {
-                Timber.e("showing car bar");
-                setCartInfoBar(cartItems);
-                toggleCartBar(true);
-            } else {
-                Timber.e("hiding car bar");
-                toggleCartBar(false);
-            }
-
-            mAdapter.setCartItems(cartItems);
-        };
-    }
-
-    private void setCartInfoBar(RealmResults<CartItem> cartItems) {
-        int itemCount = 0;
-        for (CartItem cartItem : cartItems) {
-            itemCount += cartItem.quantity;
-        }
-        cartInfoBar.setData(itemCount, String.valueOf(Utils.getCartPrice(cartItems)));
-    }
-
-    private void renderProducts() {
-        RealmResults<Product> products = AppDatabase.getProducts();
-        mAdapter = new ProductsAdapter(this, products, this);
-        recyclerView.setAdapter(mAdapter);
-        mAdapter.notifyDataSetChanged();
     }
 
     private void init() {
-        prefs = PrefManager.with(this);
-        apiClient = ApiService.getClient().create(ApiClient.class);
+        realm = Realm.getDefaultInstance();
+        realm.where(CartItem.class).findAllAsync()
+                .addChangeListener(cartItems -> {
 
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
+                });
 
-        cartInfoBar.setListener(() -> showCart());
+        /*realm.where(AppConfig.class).findFirst().addChangeListener(new RealmChangeListener<AppConfig>() {
+            @Override
+            public void onChange(AppConfig appConfig) {
+                getChecksum();
+            }
+        });*/
+
+        appConfig = realm.where(AppConfig.class).findFirst();
+        orderId = generateOrderId();
+        // getChecksum();
+        prepareOrder();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+    private void prepareOrder() {
+        List<CartItem> cartItems = realm.where(CartItem.class).findAll();
+        PrepareOrderRequest request = new PrepareOrderRequest();
+        request.orderId = generateOrderId();
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.productId = cartItem.product.id;
+            orderItem.quantity = cartItem.quantity;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.transactions) {
-            startActivity(new Intent(MainActivity.this, TransactionsActivity.class));
-            return true;
+            orderItems.add(orderItem);
         }
 
-        if (item.getItemId() == R.id.clear_cart) {
-            AppDatabase.clearCart();
-        }
+        request.orderItems = orderItems;
 
-        return super.onOptionsItemSelected(item);
+        getApi().prepareOrder(request).enqueue(new Callback<PrepareOrderResponse>() {
+            @Override
+            public void onResponse(Call<PrepareOrderResponse> call, Response<PrepareOrderResponse> response) {
+                if (!response.isSuccessful()) {
+                    Timber.e("prepareOrder not successful!");
+                    return;
+                }
+
+                Timber.e("prepareOrder response: %s", response.body());
+            }
+
+            @Override
+            public void onFailure(Call<PrepareOrderResponse> call, Throwable t) {
+                Timber.e("prepareOrder onFailure %s", t.getMessage());
+            }
+        });
     }
-
-    void showCart() {
-        CartBottomSheetFragment fragment = new CartBottomSheetFragment();
-        fragment.show(getSupportFragmentManager(), fragment.getTag());
-    }
-
-    //@OnClick(R.id.btn_pay)
-    //void pay() {
-    //getChecksum();
-    //}
 
     void getChecksum() {
-        AppConfig config = prefs.getAppConfig();
-        if (config == null) {
+        Timber.e("getCheckSum");
+        if (appConfig == null) {
             // TODO config is null
             // handle this error
             Timber.e("App config is null! Can't place the order");
             return;
         }
 
-        final Map<String, String> paramMap = new HashMap<String, String>();
+        // final Map<String, String> paramMap = new HashMap<String, String>();
 
         // these are mandatory parameters
         // https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp
 
-        String orderId = generateOrderId();
+        // String orderId = generateOrderId();
         //String orderId = "ORD7829385262";
 
         /*paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
@@ -179,25 +126,29 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         paramMap.put("MOBILE_NO", "8179679983");
         paramMap.put("EMAIL", "ravi@droid5.com");*/
 
-        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + orderId);
-        paramMap.put("CHANNEL_ID", config.getChannel());
-        //paramMap.put("CUST_ID", customerId);
-        paramMap.put("INDUSTRY_TYPE_ID", config.getIndustryType());
-        paramMap.put("MID", config.getMerchantId());
+        /*paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + orderId);
+        paramMap.put("CHANNEL_ID", appConfig.getChannel());
+        paramMap.put("CUST_ID", "CUSTOMER909090");
+        paramMap.put("INDUSTRY_TYPE_ID", appConfig.getIndustryType());
+        paramMap.put("MID", appConfig.getMerchantId());
         paramMap.put("TXN_AMOUNT", "1.00");
-        paramMap.put("WEBSITE", config.getWebsite());
+        paramMap.put("WEBSITE", appConfig.getWebsite());
         paramMap.put("ORDER_ID", orderId);
-        paramMap.put("MOBILE_NO", "7777777777");
+        //paramMap.put("MOBILE_NO", "7777777777");*/
 
+        Map<String, String> paramMap = getParams();
 
-        apiClient.getCheckSum(paramMap).enqueue(new Callback<PrepareOrderResponse>() {
+        Timber.e("Params: %s", paramMap);
+
+        getApi().getCheckSum(paramMap).enqueue(new Callback<PrepareOrderResponse>() {
             @Override
             public void onResponse(Call<PrepareOrderResponse> call, Response<PrepareOrderResponse> response) {
-                Timber.e("Checksum: " + response.body().getCheckSum());
                 if (!response.isSuccessful()) {
                     // TODO - handle error
                     return;
                 }
+
+                Timber.e("Checksum: " + response.body().getCheckSum());
 
                 paramMap.put("CHECKSUMHASH", response.body().getCheckSum());
                 placeOrder(paramMap);
@@ -209,6 +160,19 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
                 Timber.e("checksum onFailure %s", t.getMessage());
             }
         });
+    }
+
+    public Map<String, String> getParams() {
+        Map<String, String> paramMap = new HashMap<String, String>();
+        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + orderId);
+        paramMap.put("CHANNEL_ID", appConfig.getChannel());
+        paramMap.put("CUST_ID", "CUSTOMER909090");
+        paramMap.put("INDUSTRY_TYPE_ID", appConfig.getIndustryType());
+        paramMap.put("MID", appConfig.getMerchantId());
+        paramMap.put("TXN_AMOUNT", "1.00");
+        paramMap.put("WEBSITE", appConfig.getWebsite());
+        paramMap.put("ORDER_ID", orderId);
+        return paramMap;
     }
 
     public void placeOrder(Map<String, String> params) {
@@ -261,7 +225,11 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
                     @Override
                     public void onTransactionResponse(Bundle inResponse) {
                         Timber.e("onTransactionResponse: %s", inResponse.toString());
+
+                        String checkSum = inResponse.getString("CHECKSUMHASH");
+                        Timber.e("onTransactionResponse CHECKSUMHASH: %s", checkSum);
                         Toast.makeText(getApplicationContext(), "Payment Transaction response " + inResponse.toString(), Toast.LENGTH_LONG).show();
+                        verifyCheckSum(checkSum);
                     }
 
                     @Override
@@ -293,7 +261,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
                     // had to be added: NOTE
                     @Override
                     public void onBackPressedCancelTransaction() {
-                        Toast.makeText(MainActivity.this, "Back pressed. Transaction cancelled", Toast.LENGTH_LONG).show();
+                        Toast.makeText(PayTMActivity.this, "Back pressed. Transaction cancelled", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -304,61 +272,39 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
                 });
     }
 
+    private void verifyCheckSum(String checkSum) {
+        Map<String, String> paramMap = getParams();
+        paramMap.put("check_sum", checkSum);
+
+        Timber.e("Params: %s", paramMap);
+
+        getApi().verifyChecksum(paramMap).enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (!response.isSuccessful()) {
+                    Timber.e("request failed!");
+                    return;
+                }
+                Timber.e("onResponse: %s", response.body());
+            }
+
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                Timber.e("onFailure %s", t.getMessage());
+            }
+        });
+    }
+
     private String generateOrderId() {
         return UUID.randomUUID().toString();
-    }
-
-    private int dpToPx(int dp) {
-        Resources r = getResources();
-        return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
-    }
-
-    @Override
-    public void onProductAddedCart(int index, Product product) {
-        AppDatabase.addItemToCart(product);
-        if (cartItems != null) {
-            mAdapter.updateItem(index, cartItems);
-        }
-    }
-
-    @Override
-    public void onProductRemovedFromCart(int index, Product product) {
-        AppDatabase.removeCartItem(product);
-        if (cartItems != null) {
-            mAdapter.updateItem(index, cartItems);
-        }
-    }
-
-    private void toggleCartBar(boolean show) {
-        if (show)
-            cartInfoBar.setVisibility(View.VISIBLE);
-        else
-            cartInfoBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (cartItems != null) {
-            // cartItems.removeChangeListener(cartRealmChangeListener);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (cartItems != null) {
-            cartItems.addChangeListener(cartRealmChangeListener);
-        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (cartItems != null) {
-            cartItems.addChangeListener(cartRealmChangeListener);
-        }
+
         if (realm != null) {
+            realm.removeAllChangeListeners();
             realm.close();
         }
     }

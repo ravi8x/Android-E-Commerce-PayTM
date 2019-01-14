@@ -2,6 +2,7 @@ package info.androidhive.paytmgateway.ui.cart;
 
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,6 +26,7 @@ import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.Utils;
+import info.androidhive.paytmgateway.ui.paytm.PayTMActivity;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -38,12 +40,7 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     Button btnCheckout;
 
     private Realm realm;
-    // private RealmResults<Cart> cart;
-    // private Cart cart;
-    // private RealmChangeListener<RealmResults<Cart>> cartRealmChangeListener;
     private CartProductsAdapter mAdapter;
-    private CartBottomSheetFragmentListener listener;
-
     private RealmResults<CartItem> cartItems;
     private RealmChangeListener<RealmResults<CartItem>> cartItemRealmChangeListener;
 
@@ -51,23 +48,11 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         // Required empty public constructor
     }
 
-    public void setListener(CartBottomSheetFragmentListener listener) {
-        this.listener = listener;
-    }
-
-    public static CartBottomSheetFragment newInstance(String param1, String param2) {
-        CartBottomSheetFragment fragment = new CartBottomSheetFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-
+        // Making bottom sheet expanding to full height by default
         BottomSheetDialog dialog = (BottomSheetDialog) super.onCreateDialog(savedInstanceState);
-
         dialog.setOnShowListener(dialog1 -> {
             BottomSheetDialog d = (BottomSheetDialog) dialog1;
 
@@ -85,7 +70,6 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_cart_bottom_sheet, container, false);
         ButterKnife.bind(this, view);
         realm = Realm.getDefaultInstance();
@@ -104,10 +88,6 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        // realm = Realm.getDefaultInstance();
-        // cart = realm.where(Cart.class).findAll();
-        // cartItems = realm.where(Cart.class).findAll();
         init();
     }
 
@@ -120,16 +100,6 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         recyclerView.setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
         setTotalPrice();
-
-        /*cartRealmChangeListener = cart -> {
-            if (cart != null && cart.get(0).cartItems.size() > 0) {
-                mAdapter.setCart(cart.get(0));
-            }
-        };
-
-        if (cart != null) {
-            cart.addChangeListener(cartRealmChangeListener);
-        }*/
     }
 
     private void setTotalPrice() {
@@ -138,6 +108,7 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
             if (price > 0) {
                 btnCheckout.setText(getString(R.string.btn_checkout, getString(R.string.price_with_currency, price)));
             } else {
+                // if the price is zero, dismiss the dialog
                 dismiss();
             }
         }
@@ -165,12 +136,13 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
         dismiss();
     }
 
+    @OnClick(R.id.btn_checkout)
+    void onCheckoutClick() {
+        startActivity(new Intent(getActivity(), PayTMActivity.class));
+    }
+
     @Override
     public void onCartItemRemoved(int index, CartItem cartItem) {
         AppDatabase.removeCartItem(cartItem);
-    }
-
-    public interface CartBottomSheetFragmentListener {
-        void onCartItemRemoved(int index, CartItem cartItem);
     }
 }

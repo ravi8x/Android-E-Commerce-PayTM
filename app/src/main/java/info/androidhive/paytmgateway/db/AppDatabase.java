@@ -17,6 +17,10 @@ public class AppDatabase {
         Realm.getDefaultInstance().executeTransactionAsync(realm -> realm.copyToRealmOrUpdate(appConfig));
     }
 
+    public static AppConfig getAppConfig() {
+        return Realm.getDefaultInstance().where(AppConfig.class).findFirst();
+    }
+
     public static void saveProducts(final List<Product> products) {
         Realm.getDefaultInstance().executeTransactionAsync(realm -> {
             for (Product product : products) {

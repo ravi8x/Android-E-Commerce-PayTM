@@ -17,6 +17,9 @@
             android:name=".ui.transactions.TransactionsActivity"
             android:label="@string/title_activity_transactions"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.paytm.PayTMActivity"
+            android:label="@string/title_activity_paytm_activity"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".ui.SplashActivity"
             android:theme="@style/AppTheme.NoActionBar">

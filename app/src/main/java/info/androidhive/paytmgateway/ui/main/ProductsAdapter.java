@@ -15,7 +15,6 @@ import info.androidhive.paytmgateway.app.GlideApp;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.Product;
 import io.realm.RealmResults;
-import timber.log.Timber;
 
 public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyViewHolder> {
 
@@ -80,10 +79,8 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
         });
 
         if (cartItems != null) {
-            Timber.e("cartItems:size: %d | product Id: %d", cartItems.size(), product.id);
             CartItem cartItem = cartItems.where().equalTo("product.id", product.id).findFirst();
             if (cartItem != null) {
-                Timber.e("product quantity: %d", cartItem.quantity);
                 holder.lblQuantity.setText(String.valueOf(cartItem.quantity));
                 holder.icRemove.setVisibility(View.VISIBLE);
                 holder.lblQuantity.setVisibility(View.VISIBLE);
@@ -97,7 +94,6 @@ public class ProductsAdapter extends RecyclerView.Adapter<ProductsAdapter.MyView
     }
 
     public void setCartItems(RealmResults<CartItem> cartItems) {
-        Timber.e("setCartItems: %s", cartItems);
         this.cartItems = cartItems;
         notifyDataSetChanged();
     }

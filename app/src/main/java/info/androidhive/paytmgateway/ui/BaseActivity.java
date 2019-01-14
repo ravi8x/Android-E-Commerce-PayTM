@@ -3,7 +3,9 @@ package info.androidhive.paytmgateway.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
+import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.networking.ApiClient;
 import info.androidhive.paytmgateway.networking.ApiService;
 import timber.log.Timber;
@@ -26,5 +28,10 @@ public class BaseActivity extends AppCompatActivity {
 
     public void handleError(Throwable throwable) {
         Timber.e("Handle error: %s", throwable);
+    }
+
+    public void setToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -14,10 +15,13 @@ import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.networking.model.register.UserRegisterRequest;
+import info.androidhive.paytmgateway.networking.model.register.UserRegisterResponse;
 import info.androidhive.paytmgateway.ui.main.MainActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 public class SplashActivity extends BaseActivity {
 
@@ -31,7 +35,37 @@ public class SplashActivity extends BaseActivity {
         setContentView(R.layout.activity_splash);
         changeStatusBarColor();
 
+        registerDevice();
         fetchAppConfig();
+    }
+
+    private void registerDevice() {
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        UserRegisterRequest request = new UserRegisterRequest();
+        request.deviceId = deviceId;
+
+        getApi().registerDevice(request).enqueue(new Callback<UserRegisterResponse>() {
+            @Override
+            public void onResponse(Call<UserRegisterResponse> call, Response<UserRegisterResponse> response) {
+                if (!response.isSuccessful()) {
+                    // TODO
+                    // unable to register device
+                    Timber.e("Unable to register device");
+                    return;
+                }
+
+                Timber.e("User registered! %s", response.body().authToken);
+
+                // TODO - store user auth token
+                fetchAppConfig();
+            }
+
+            @Override
+            public void onFailure(Call<UserRegisterResponse> call, Throwable t) {
+                Timber.e("Failed to register device");
+            }
+        });
     }
 
     private void fetchAppConfig() {

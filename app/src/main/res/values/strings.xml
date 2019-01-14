@@ -12,4 +12,5 @@
     <string name="btn_checkout">CHECKOUT (%s)</string>
     <string name="lbl_item_price_quantity">%s x %d</string>
     <string name="lbl_your_cart">Your Cart</string>
+    <string name="title_activity_paytm_activity">Order Status</string>
 </resources>
