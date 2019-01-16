@@ -1,27 +1,46 @@
-package info.androidhive.paytmgateway.ui;
+package info.androidhive.paytmgateway.ui.login;
 
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
+import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
-import info.androidhive.paytmgateway.networking.model.register.UserRegisterRequest;
+import info.androidhive.paytmgateway.networking.model.login.LoginRequest;
+import info.androidhive.paytmgateway.networking.model.register.User;
+import info.androidhive.paytmgateway.ui.BaseActivity;
 import info.androidhive.paytmgateway.ui.main.MainActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SplashActivity extends BaseActivity {
+public class LoginActivity extends BaseActivity {
+
+    @BindView(R.id.input_email)
+    EditText inputEmail;
+
+    @BindView(R.id.input_password)
+    EditText inputPassword;
+
+    @BindView(R.id.loader)
+    AVLoadingIndicatorView loader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,41 +48,45 @@ public class SplashActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-
-        setContentView(R.layout.activity_splash);
+        setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
         changeStatusBarColor();
-
-        registerDevice();
-        fetchAppConfig();
     }
 
-    private void registerDevice() {
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+    @OnClick(R.id.btn_login)
+    void onLoginClick() {
+        String email = inputEmail.getText().toString();
+        String password = inputPassword.getText().toString();
 
-        UserRegisterRequest request = new UserRegisterRequest();
-        request.deviceId = deviceId;
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(getApplicationContext(), getString(R.string.msg_enter_credentials), Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        /*getApi().registerDevice(request).enqueue(new Callback<User>() {
+        loader.setVisibility(View.VISIBLE);
+        LoginRequest request = new LoginRequest();
+        request.email = email;
+        request.password = password;
+        getApi().login(request).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
+                loader.setVisibility(View.INVISIBLE);
                 if (!response.isSuccessful()) {
-                    // TODO
-                    // unable to register device
-                    Timber.e("Unable to register device");
+                    // TODO - handle error
                     return;
                 }
 
-                Timber.e("User registered! %s", response.body().authToken);
+                AppDatabase.saveUser(response.body());
+                AppPref.getInstance().saveAuthToken(response.body().token);
 
-                // TODO - store user auth token
                 fetchAppConfig();
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                Timber.e("Failed to register device");
+                loader.setVisibility(View.INVISIBLE);
             }
-        });*/
+        });
     }
 
     private void fetchAppConfig() {
@@ -115,7 +138,7 @@ public class SplashActivity extends BaseActivity {
     }
 
     private void launchHomeScreen() {
-        Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

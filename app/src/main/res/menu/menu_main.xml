@@ -15,4 +15,8 @@
     <item
         android:id="@+id/clear_cart"
         android:title="@string/clear_cart" />
+
+    <item
+        android:id="@+id/logout"
+        android:title="@string/logout" />
 </menu>

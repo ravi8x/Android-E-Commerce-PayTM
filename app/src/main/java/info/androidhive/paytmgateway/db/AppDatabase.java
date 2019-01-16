@@ -1,16 +1,24 @@
 package info.androidhive.paytmgateway.db;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.networking.model.register.User;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class AppDatabase {
     public AppDatabase() {
+    }
+
+    public static void saveUser(User user) {
+        Realm.getDefaultInstance().executeTransaction(realm -> realm.copyToRealmOrUpdate(user));
+    }
+
+    public static User getUser() {
+        return Realm.getDefaultInstance().where(User.class).findFirst();
     }
 
     public static void saveAppConfig(final AppConfig appConfig) {
@@ -144,5 +152,9 @@ public class AppDatabase {
 
     public static void clearCart() {
         Realm.getDefaultInstance().executeTransactionAsync(realm -> realm.delete(CartItem.class));
+    }
+
+    public static void clearData() {
+        Realm.getDefaultInstance().executeTransaction(realm -> realm.deleteAll());
     }
 }

@@ -26,6 +26,7 @@ import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.PrefManager;
 import info.androidhive.paytmgateway.db.AppDatabase;
+import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
 import info.androidhive.paytmgateway.helper.Utils;
@@ -36,6 +37,7 @@ import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.networking.model.Product;
 import info.androidhive.paytmgateway.ui.BaseActivity;
 import info.androidhive.paytmgateway.ui.cart.CartBottomSheetFragment;
+import info.androidhive.paytmgateway.ui.login.LoginActivity;
 import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
 import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
@@ -82,11 +84,9 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
             }
 
             if (cartItems != null && cartItems.size() > 0) {
-                Timber.e("showing car bar");
                 setCartInfoBar(cartItems);
                 toggleCartBar(true);
             } else {
-                Timber.e("hiding car bar");
                 toggleCartBar(false);
             }
 
@@ -138,7 +138,19 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
             AppDatabase.clearCart();
         }
 
+        if (item.getItemId() == R.id.logout) {
+            AppDatabase.clearData();
+            AppPref.getInstance().clearData();
+            launchLogin();
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    private void launchLogin() {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 
     void showCart() {
@@ -347,6 +359,9 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     @Override
     protected void onResume() {
         super.onResume();
+
+        checkSession(MainActivity.this);
+
         if (cartItems != null) {
             cartItems.addChangeListener(cartRealmChangeListener);
         }

@@ -13,4 +13,9 @@
     <string name="lbl_item_price_quantity">%s x %d</string>
     <string name="lbl_your_cart">Your Cart</string>
     <string name="title_activity_paytm_activity">Order Status</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="login">Login</string>
+    <string name="msg_enter_credentials">Enter email and username!</string>
+    <string name="logout">Logout</string>
 </resources>

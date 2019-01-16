@@ -7,8 +7,9 @@ import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.networking.model.login.LoginRequest;
 import info.androidhive.paytmgateway.networking.model.register.UserRegisterRequest;
-import info.androidhive.paytmgateway.networking.model.register.UserRegisterResponse;
+import info.androidhive.paytmgateway.networking.model.register.User;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.FieldMap;
@@ -17,8 +18,11 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public interface ApiClient {
+    @POST("login")
+    Call<User> login(@Body LoginRequest loginRequest);
+
     @POST("register")
-    Call<UserRegisterResponse> registerDevice(@Body UserRegisterRequest userRegisterRequest);
+    Call<User> register(@Body UserRegisterRequest userRegisterRequest);
 
     @GET("appConfig")
     Call<AppConfig> getAppConfig();

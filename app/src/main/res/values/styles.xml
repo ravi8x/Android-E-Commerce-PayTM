@@ -41,4 +41,22 @@
         <item name="android:background">@drawable/bg_rounded_corner_bottom_sheet</item>
     </style>
 
+    <style name="TextLabel" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@android:color/black</item>
+        <item name="android:textSize">20sp</item>
+        <item name="colorAccent">@android:color/black</item>
+        <item name="colorControlNormal">@android:color/black</item>
+        <item name="colorControlActivated">@android:color/black</item>
+    </style>
+
+    <style name="TextAppearance.App.TextInputLayout" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ButtonBlack" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@android:color/black</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 </resources>
