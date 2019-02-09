@@ -5,7 +5,7 @@ import java.util.List;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
-import info.androidhive.paytmgateway.networking.model.register.User;
+import info.androidhive.paytmgateway.db.model.User;
 import io.realm.Realm;
 import io.realm.RealmResults;
 

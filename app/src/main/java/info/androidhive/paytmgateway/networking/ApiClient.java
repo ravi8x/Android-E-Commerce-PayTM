@@ -4,14 +4,17 @@ import java.util.List;
 import java.util.Map;
 
 import info.androidhive.paytmgateway.networking.model.AppConfig;
+import info.androidhive.paytmgateway.networking.model.ChecksumResponse;
+import info.androidhive.paytmgateway.networking.model.OrderResponse;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.networking.model.Product;
-import info.androidhive.paytmgateway.networking.model.login.LoginRequest;
-import info.androidhive.paytmgateway.networking.model.register.UserRegisterRequest;
-import info.androidhive.paytmgateway.networking.model.register.User;
+import info.androidhive.paytmgateway.networking.model.LoginRequest;
+import info.androidhive.paytmgateway.networking.model.RegisterRequest;
+import info.androidhive.paytmgateway.db.model.User;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -22,18 +25,18 @@ public interface ApiClient {
     Call<User> login(@Body LoginRequest loginRequest);
 
     @POST("register")
-    Call<User> register(@Body UserRegisterRequest userRegisterRequest);
+    Call<User> register(@Body RegisterRequest registerRequest);
 
     @GET("appConfig")
     Call<AppConfig> getAppConfig();
 
     @FormUrlEncoded
     @POST("getChecksum")
-    Call<PrepareOrderResponse> getCheckSum(@FieldMap Map<String, String> params);
+    Call<ChecksumResponse> getCheckSum(@FieldMap Map<String, String> params);
 
     @FormUrlEncoded
-    @POST("verifyChecksum")
-    Call<Boolean> verifyChecksum(@FieldMap Map<String, String> params);
+    @POST("transactionStatus")
+    Call<OrderResponse> checkTransactionStatus(@Field("order_id") String orderId);
 
     @GET("products")
     Call<List<Product>> getProducts();

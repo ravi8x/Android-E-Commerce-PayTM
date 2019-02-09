@@ -1,22 +1,21 @@
 package info.androidhive.paytmgateway.ui;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.text.TextUtils;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 import java.util.List;
 
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
+import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
-import info.androidhive.paytmgateway.networking.model.register.UserRegisterRequest;
+import info.androidhive.paytmgateway.ui.login.LoginActivity;
 import info.androidhive.paytmgateway.ui.main.MainActivity;
+import info.androidhive.paytmgateway.ui.register.RegisterActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,39 +30,18 @@ public class SplashActivity extends BaseActivity {
         }
 
         setContentView(R.layout.activity_splash);
+
+        if (!TextUtils.isEmpty(AppPref.getInstance().getAuthToken())) {
+            // user token is not present, take him to login screen
+            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
         changeStatusBarColor();
-
-        registerDevice();
         fetchAppConfig();
-    }
-
-    private void registerDevice() {
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        UserRegisterRequest request = new UserRegisterRequest();
-        request.deviceId = deviceId;
-
-        /*getApi().registerDevice(request).enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (!response.isSuccessful()) {
-                    // TODO
-                    // unable to register device
-                    Timber.e("Unable to register device");
-                    return;
-                }
-
-                Timber.e("User registered! %s", response.body().authToken);
-
-                // TODO - store user auth token
-                fetchAppConfig();
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Timber.e("Failed to register device");
-            }
-        });*/
     }
 
     private void fetchAppConfig() {
@@ -72,7 +50,7 @@ public class SplashActivity extends BaseActivity {
             @Override
             public void onResponse(Call<AppConfig> call, Response<AppConfig> response) {
                 if (!response.isSuccessful()) {
-                    handleError(null);
+                    handleError(response.errorBody());
                     return;
                 }
 
@@ -96,7 +74,7 @@ public class SplashActivity extends BaseActivity {
             @Override
             public void onResponse(Call<List<Product>> call, Response<List<Product>> response) {
                 if (!response.isSuccessful()) {
-                    handleError(null);
+                    handleError(response.errorBody());
                     return;
                 }
 
@@ -118,13 +96,5 @@ public class SplashActivity extends BaseActivity {
         Intent intent = new Intent(SplashActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
-    }
-
-    private void changeStatusBarColor() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
     }
 }

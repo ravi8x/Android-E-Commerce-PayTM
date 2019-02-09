@@ -15,8 +15,12 @@
     <dimen name="corner_radius_bottom_sheet">8dp</dimen>
     <dimen name="corner_radius_remove_item">3dp</dimen>
     <dimen name="btn_remove_item">24dp</dimen>
-    <dimen name="logo_login">40dp</dimen>
-    <dimen name="logo_margin_top">40dp</dimen>
+    <dimen name="logo_login">60dp</dimen>
+    <dimen name="logo_margin_top">60dp</dimen>
     <dimen name="login_field_height">40dp</dimen>
     <dimen name="dimen_80">80dp</dimen>
+    <dimen name="corner_radius_form_input">6dp</dimen>
+    <dimen name="logo_width_form">80dp</dimen>
+    <dimen name="lbl_processing_transaction">16dp</dimen>
+    <dimen name="lbl_order_status">20sp</dimen>
 </resources>

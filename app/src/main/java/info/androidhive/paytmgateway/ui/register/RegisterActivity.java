@@ -1,4 +1,4 @@
-package info.androidhive.paytmgateway.ui.login;
+package info.androidhive.paytmgateway.ui.register;
 
 import android.content.Intent;
 import android.os.Build;
@@ -17,16 +17,16 @@ import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.db.model.User;
-import info.androidhive.paytmgateway.networking.model.LoginRequest;
+import info.androidhive.paytmgateway.networking.model.RegisterRequest;
 import info.androidhive.paytmgateway.ui.BaseActivity;
-import info.androidhive.paytmgateway.ui.main.MainActivity;
-import info.androidhive.paytmgateway.ui.register.RegisterActivity;
+import info.androidhive.paytmgateway.ui.login.LoginActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import timber.log.Timber;
 
-public class LoginActivity extends BaseActivity {
+public class RegisterActivity extends BaseActivity {
+    @BindView(R.id.input_name)
+    EditText inputName;
 
     @BindView(R.id.input_email)
     EditText inputEmail;
@@ -43,52 +43,52 @@ public class LoginActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= 21) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
         changeStatusBarColor();
     }
 
-    @OnClick(R.id.btn_login)
-    void onLoginClick() {
+    @OnClick(R.id.btn_register)
+    void onRegisterClick() {
+        String name = inputName.getText().toString();
         String email = inputEmail.getText().toString();
         String password = inputPassword.getText().toString();
 
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(getApplicationContext(), getString(R.string.msg_enter_credentials), Toast.LENGTH_LONG).show();
+        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            Toast.makeText(getApplicationContext(), getString(R.string.msg_fill_the_form), Toast.LENGTH_LONG).show();
             return;
         }
 
         loader.setVisibility(View.VISIBLE);
-        LoginRequest request = new LoginRequest();
+        RegisterRequest request = new RegisterRequest();
+        request.name = name;
         request.email = email;
         request.password = password;
-        getApi().login(request).enqueue(new Callback<User>() {
+        getApi().register(request).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                Timber.e("response: %s", response.body());
                 loader.setVisibility(View.INVISIBLE);
                 if (!response.isSuccessful()) {
-                    handleError(response.errorBody());
+                    // TODO - handle error
                     return;
                 }
 
                 AppDatabase.saveUser(response.body());
                 AppPref.getInstance().saveAuthToken(response.body().token);
 
-                launchSplash(LoginActivity.this);
+                launchSplash(RegisterActivity.this);
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 loader.setVisibility(View.INVISIBLE);
-                handleError(t);
             }
         });
     }
 
-    @OnClick(R.id.btn_create_account)
+    @OnClick(R.id.btn_login_account)
     void onCreateAccountClick() {
-        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

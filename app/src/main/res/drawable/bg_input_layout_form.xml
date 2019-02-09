@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/bg_input_form"></solid>
+    <padding
+        android:bottom="@dimen/activity_margin_half"
+        android:left="@dimen/activity_margin_half"
+        android:right="@dimen/activity_margin_half"
+        android:top="@dimen/activity_margin_half"></padding>
+
+    <!-- Here is the corner radius -->
+    <corners android:radius="@dimen/corner_radius_form_input"></corners>
+
+</shape>

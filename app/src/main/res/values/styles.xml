@@ -42,7 +42,7 @@
     </style>
 
     <style name="TextLabel" parent="TextAppearance.AppCompat">
-        <item name="android:textColorHint">@android:color/black</item>
+        <item name="android:textColorHint">@color/hint_label</item>
         <item name="android:textSize">20sp</item>
         <item name="colorAccent">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
@@ -50,13 +50,19 @@
     </style>
 
     <style name="TextAppearance.App.TextInputLayout" parent="@android:style/TextAppearance">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@color/hint_label</item>
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="ButtonBlack" parent="Widget.AppCompat.Button.Colored">
         <item name="colorButtonNormal">@android:color/black</item>
+        <item name="android:minHeight">0dp</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_height">60dp</item>
     </style>
 
+    <style name="AlertDialog" parent="@android:style/Theme.Dialog">
+        <item name="colorAccent">@android:color/black</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
 </resources>

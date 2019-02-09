@@ -18,4 +18,18 @@
     <string name="login">Login</string>
     <string name="msg_enter_credentials">Enter email and username!</string>
     <string name="logout">Logout</string>
+    <string name="hint_name">Fullname</string>
+    <string name="register">Register</string>
+    <string name="msg_fill_the_form">Please fill the form!</string>
+    <string name="lbl_create_account">Don\'t have an account? Sign Up here.</string>
+    <string name="lbl_existing_account">Already have an account? Login here</string>
+    <string name="msg_unknown">Unknown error occurred! Please try again.</string>
+    <string name="error">Error</string>
+    <string name="msg_preparing_order">Preparing your order</string>
+    <string name="msg_fetching_checksum">Getting checksum value from the server</string>
+    <string name="msg_redirecting_to_paytm">Redirecting to PayTM gateway</string>
+    <string name="msg_verifying_status">Verifying transaction status on server</string>
+    <string name="msg_order_placed_successfully">Your order placed successfully!</string>
+    <string name="thank_you">THANK YOU</string>
+    <string name="btn_check_order">CHECK ORDERS</string>
 </resources>

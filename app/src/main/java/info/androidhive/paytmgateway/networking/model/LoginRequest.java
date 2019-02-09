@@ -1,4 +1,4 @@
-package info.androidhive.paytmgateway.networking.model.login;
+package info.androidhive.paytmgateway.networking.model;
 
 public class LoginRequest {
     public String email;

@@ -17,13 +17,13 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/logo_login"
+            android:layout_width="@dimen/logo_login"
+            android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/activity_margin"
             android:src="@drawable/logo_mart9_bag" />
 
         <ImageView
-            android:layout_width="@dimen/logo_width_form"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:src="@drawable/logo_mart9" />
 
@@ -34,28 +34,49 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/logo_container"
         android:layout_marginLeft="@dimen/activity_margin"
-        android:layout_marginTop="@dimen/logo_margin_top"
+        android:layout_marginTop="@dimen/dimen_30"
         android:layout_marginRight="@dimen/activity_margin"
         android:orientation="vertical">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/input_layout_name"
+            style="@style/TextLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFEB6E"
+            android:padding="8dp"
+            app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout">
+
+            <EditText
+                android:id="@+id/input_name"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="#FFEB6E"
+                android:hint="@string/hint_name"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/black"
+                android:textCursorDrawable="@null" />
+
+        </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/input_layout_email"
             style="@style/TextLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_input_layout_form"
+            android:layout_marginTop="@dimen/dimen_30"
+            android:background="#FFEB6E"
+            android:padding="8dp"
             app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout">
 
-            <android.support.design.widget.TextInputEditText
+            <EditText
                 android:id="@+id/input_email"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_margin_half"
-                android:background="@null"
-                android:inputType="textEmailAddress"
+                android:layout_height="30dp"
+                android:background="#FFEB6E"
                 android:hint="@string/hint_email"
-                android:paddingLeft="@dimen/activity_margin_half"
-                android:paddingRight="@dimen/activity_margin_half"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/black"
                 android:textCursorDrawable="@null" />
 
         </android.support.design.widget.TextInputLayout>
@@ -65,31 +86,23 @@
             style="@style/TextLabel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_margin"
-            android:background="@drawable/bg_input_layout_form"
+            android:layout_marginTop="@dimen/dimen_30"
+            android:background="#FFEB6E"
+            android:padding="8dp"
             app:hintTextAppearance="@style/TextAppearance.App.TextInputLayout">
 
-            <android.support.design.widget.TextInputEditText
+            <EditText
                 android:id="@+id/input_password"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_margin_half"
-                android:background="@null"
+                android:layout_height="30dp"
+                android:background="#FFEB6E"
                 android:hint="@string/hint_password"
                 android:inputType="textPassword"
-                android:paddingLeft="@dimen/activity_margin_half"
-                android:paddingRight="@dimen/activity_margin_half"
+                android:textColor="@android:color/black"
+                android:textColorHint="@android:color/black"
                 android:textCursorDrawable="@null" />
 
         </android.support.design.widget.TextInputLayout>
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_30"
-            android:text="@string/login"
-            android:theme="@style/ButtonBlack" />
 
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/loader"
@@ -99,21 +112,30 @@
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/dimen_30"
+            android:layout_marginBottom="@dimen/dimen_30"
             android:visibility="invisible"
             app:indicatorColor="@android:color/black"
             app:indicatorName="BallPulseIndicator" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_30"
+            android:text="@string/register"
+            android:theme="@style/ButtonBlack" />
     </LinearLayout>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/btn_create_account"
+    <Button
+        android:id="@+id/btn_login_account"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/dimen_30"
         android:background="@null"
-        android:text="@string/lbl_create_account"
+        android:text="@string/lbl_existing_account"
         android:textAllCaps="false"
-        android:textColor="@color/hint_label" />
+        android:textColor="@android:color/black" />
 
 </RelativeLayout>

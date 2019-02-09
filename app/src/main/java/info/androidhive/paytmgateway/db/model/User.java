@@ -1,4 +1,4 @@
-package info.androidhive.paytmgateway.networking.model.register;
+package info.androidhive.paytmgateway.db.model;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
