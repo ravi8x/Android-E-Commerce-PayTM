@@ -16,6 +16,8 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.db.AppDatabase;
@@ -51,8 +53,12 @@ public class BaseActivity extends AppCompatActivity {
     public void handleError(ResponseBody responseBody) {
         String message = null;
         if (responseBody != null) {
-            ErrorResponse errorResponse = new Gson().fromJson(responseBody.charStream(), ErrorResponse.class);
-            message = errorResponse.error;
+            try {
+                ErrorResponse errorResponse = new Gson().fromJson(responseBody.charStream(), ErrorResponse.class);
+                message = errorResponse.error;
+            } catch (JsonSyntaxException e) {
+            } catch (JsonIOException e) {
+            }
         }
 
         message = TextUtils.isEmpty(message) ? getString(R.string.msg_unknown) : message;
@@ -61,11 +67,7 @@ public class BaseActivity extends AppCompatActivity {
 
     public void showErrorDialog(String message) {
         AlertDialog.Builder builder;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
-        } else {
-            builder = new AlertDialog.Builder(this);
-        }
+        builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.error))
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -86,8 +88,14 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    public void enableToolbarUpNavigation() {
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     public void launchSplash(Activity activity) {
-        Intent intent = new Intent(activity, MainActivity.class);
+        Intent intent = new Intent(activity, SplashActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

@@ -1,8 +1,11 @@
 package info.androidhive.paytmgateway.ui.paytm;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,10 +19,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.Constants;
 import info.androidhive.paytmgateway.db.AppDatabase;
@@ -32,8 +35,8 @@ import info.androidhive.paytmgateway.networking.model.OrderResponse;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.orders.OrdersActivity;
 import io.realm.Realm;
-import io.realm.RealmResults;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -46,14 +49,38 @@ public class PayTMActivity extends BaseActivity {
     @BindView(R.id.loader)
     AVLoadingIndicatorView loader;
 
+    @BindView(R.id.icon_status)
+    ImageView iconStatus;
+
+    @BindView(R.id.status_message)
+    TextView statusMessage;
+
+    @BindView(R.id.title_status)
+    TextView responseTitle;
+
+    @BindView(R.id.btn_check_orders)
+    TextView btnCheckOrders;
+
     @BindView(R.id.layout_order_placed)
     LinearLayout layoutOrderPlaced;
 
     private Realm realm;
-    private RealmResults<CartItem> cartItems;
     private AppConfig appConfig;
-    // private String orderId;
     private User user;
+
+    /**
+     * Steps to process order:
+     * 1. Make server call to prepare the order. Which will create a new order in the db
+     * and returns the unique Order ID
+     * <p>
+     * 2. Once the order ID is received, send the PayTM params to server to calculate the
+     * Checksum Hash
+     * <p>
+     * 3. Send the PayTM params along with checksum hash to PayTM gateway
+     * <p>
+     * 4. Once the payment is done, send the Order Id back to server to verify the
+     * transaction status
+     */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +88,8 @@ public class PayTMActivity extends BaseActivity {
         setContentView(R.layout.activity_pay_tm);
         ButterKnife.bind(this);
         setToolbar();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        enableToolbarUpNavigation();
+        getSupportActionBar().setTitle(getString(R.string.title_preparing_order));
 
         init();
     }
@@ -73,13 +101,6 @@ public class PayTMActivity extends BaseActivity {
 
                 });
 
-        /*realm.where(AppConfig.class).findFirst().addChangeListener(new RealmChangeListener<AppConfig>() {
-            @Override
-            public void onChange(AppConfig appConfig) {
-                getChecksum();
-            }
-        });*/
-
         user = AppDatabase.getUser();
         appConfig = realm.where(AppConfig.class).findFirst();
 
@@ -90,12 +111,14 @@ public class PayTMActivity extends BaseActivity {
         lblStatus.setText(message);
     }
 
+    /**
+     *
+     * */
     private void prepareOrder() {
         setStatus(R.string.msg_preparing_order);
 
         List<CartItem> cartItems = realm.where(CartItem.class).findAll();
         PrepareOrderRequest request = new PrepareOrderRequest();
-        // request.orderId = generateOrderId();
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cartItems) {
             OrderItem orderItem = new OrderItem();
@@ -136,38 +159,8 @@ public class PayTMActivity extends BaseActivity {
             return;
         }
 
-        // final Map<String, String> paramMap = new HashMap<String, String>();
-
-        // these are mandatory parameters
-        // https://pguat.paytm.com/paytmchecksum/paytmCallback.jsp
-
-        // String orderId = generateOrderId();
-        //String orderId = "ORD7829385262";
-
-        /*paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID="+orderId);
-        paramMap.put("CHANNEL_ID", "WAP");
-        paramMap.put("CUST_ID", "CUST001");
-        paramMap.put("INDUSTRY_TYPE_ID", "Retail");
-        paramMap.put("MID", "Androi78288874845632");
-        paramMap.put("TXN_AMOUNT", "1.00");
-        paramMap.put("WEBSITE", "APPSTAGING");
-        paramMap.put("ORDER_ID", orderId);
-        paramMap.put("MOBILE_NO", "8179679983");
-        paramMap.put("EMAIL", "ravi@droid5.com");*/
-
-        /*paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + orderId);
-        paramMap.put("CHANNEL_ID", appConfig.getChannel());
-        paramMap.put("CUST_ID", "CUSTOMER909090");
-        paramMap.put("INDUSTRY_TYPE_ID", appConfig.getIndustryType());
-        paramMap.put("MID", appConfig.getMerchantId());
-        paramMap.put("TXN_AMOUNT", "1.00");
-        paramMap.put("WEBSITE", appConfig.getWebsite());
-        paramMap.put("ORDER_ID", orderId);
-        //paramMap.put("MOBILE_NO", "7777777777");*/
-
-        Map<String, String> paramMap = getParams(response);
-
-        Timber.e("Params: %s", paramMap);
+        Map<String, String> paramMap = preparePayTmParams(response);
+        Timber.e("PayTm Params: %s", paramMap);
 
         getApi().getCheckSum(paramMap).enqueue(new Callback<ChecksumResponse>() {
             @Override
@@ -191,8 +184,9 @@ public class PayTMActivity extends BaseActivity {
         });
     }
 
-    public Map<String, String> getParams(PrepareOrderResponse response) {
+    public Map<String, String> preparePayTmParams(PrepareOrderResponse response) {
         Map<String, String> paramMap = new HashMap<String, String>();
+        // TODO - configure staging url
         paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + response.orderId);
         paramMap.put("CHANNEL_ID", appConfig.getChannel());
         paramMap.put("CUST_ID", "CUSTOMER_" + user.id);
@@ -317,12 +311,7 @@ public class PayTMActivity extends BaseActivity {
 
                 Timber.e("Order: " + response.body().status);
 
-                if (response.body().status.equalsIgnoreCase(Constants.ORDER_STATUS_COMPLETED)) {
-                    setStatus(R.string.msg_order_placed_successfully);
-                    loader.setVisibility(View.GONE);
-                    lblStatus.setVisibility(View.GONE);
-                    layoutOrderPlaced.setVisibility(View.VISIBLE);
-                }
+                showOrderStatus(response.body().status.equalsIgnoreCase(Constants.ORDER_STATUS_COMPLETED));
             }
 
             @Override
@@ -333,32 +322,32 @@ public class PayTMActivity extends BaseActivity {
         });
     }
 
-    /*private void verifyCheckSum(String checkSum) {
-        Map<String, String> paramMap = getParams();
-        paramMap.put("check_sum", checkSum);
+    private void showOrderStatus(boolean isSuccess) {
+        loader.setVisibility(View.GONE);
+        lblStatus.setVisibility(View.GONE);
+        if (isSuccess) {
+            iconStatus.setImageResource(R.drawable.baseline_check_black_48);
+            iconStatus.setColorFilter(ContextCompat.getColor(this, R.color.colorGreen));
+            responseTitle.setText(R.string.thank_you);
+            statusMessage.setText(R.string.msg_order_placed_successfully);
 
-        Timber.e("Params: %s", paramMap);
+            // as the order placed successfully, clear the cart
+            AppDatabase.clearCart();
+        } else {
+            iconStatus.setImageResource(R.drawable.baseline_close_black_48);
+            iconStatus.setColorFilter(ContextCompat.getColor(this, R.color.btn_remove_item));
+            responseTitle.setText(R.string.order_failed);
+            statusMessage.setText(R.string.msg_order_placed_failed);
+        }
 
-        getApi().verifyChecksum(paramMap).enqueue(new Callback<Boolean>() {
-            @Override
-            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
-                if (!response.isSuccessful()) {
-                    Timber.e("request failed!");
-                    return;
-                }
-                Timber.e("onResponse: %s", response.body());
-            }
+        layoutOrderPlaced.setVisibility(View.VISIBLE);
+    }
 
-            @Override
-            public void onFailure(Call<Boolean> call, Throwable t) {
-                Timber.e("onFailure %s", t.getMessage());
-            }
-        });
-    }*/
-
-    /*private String generateOrderId() {
-        return UUID.randomUUID().toString();
-    }*/
+    @OnClick(R.id.btn_check_orders)
+    void onOrdersClick() {
+        startActivity(new Intent(PayTMActivity.this, OrdersActivity.class));
+        finish();
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

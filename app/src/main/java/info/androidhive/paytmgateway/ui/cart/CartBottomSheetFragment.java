@@ -139,6 +139,7 @@ public class CartBottomSheetFragment extends BottomSheetDialogFragment implement
     @OnClick(R.id.btn_checkout)
     void onCheckoutClick() {
         startActivity(new Intent(getActivity(), PayTMActivity.class));
+        dismiss();
     }
 
     @Override

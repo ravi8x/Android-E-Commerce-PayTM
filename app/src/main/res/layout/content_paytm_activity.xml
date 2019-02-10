@@ -11,7 +11,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/dimen_80"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="visible">
 
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/loader"
@@ -47,11 +48,13 @@
         android:visibility="gone">
 
         <ImageView
+            android:id="@+id/icon_status"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/baseline_check_black_48" />
 
         <TextView
+            android:id="@+id/title_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_margin"
@@ -64,6 +67,7 @@
             android:textStyle="normal" />
 
         <TextView
+            android:id="@+id/status_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/activity_margin"
@@ -77,6 +81,7 @@
             android:textStyle="normal" />
 
         <TextView
+            android:id="@+id/btn_check_orders"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_30"

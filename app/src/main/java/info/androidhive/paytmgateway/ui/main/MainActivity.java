@@ -197,9 +197,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     @Override
     protected void onResume() {
         super.onResume();
-
         checkSession(MainActivity.this);
-
         if (cartItems != null) {
             cartItems.addChangeListener(cartRealmChangeListener);
         }

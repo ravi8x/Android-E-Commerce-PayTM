@@ -32,4 +32,7 @@
     <string name="msg_order_placed_successfully">Your order placed successfully!</string>
     <string name="thank_you">THANK YOU</string>
     <string name="btn_check_order">CHECK ORDERS</string>
+    <string name="title_preparing_order">Preparing Order</string>
+    <string name="msg_order_placed_failed">Order couldn\'t be placed. Plase contact support.</string>
+    <string name="order_failed">ORDER FAILED</string>
 </resources>

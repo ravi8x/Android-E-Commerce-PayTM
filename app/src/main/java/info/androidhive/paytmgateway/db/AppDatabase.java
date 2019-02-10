@@ -142,12 +142,7 @@ public class AppDatabase {
     }
 
     public static void removeCartItem(CartItem cartItem) {
-        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.where(CartItem.class).equalTo("product.id", cartItem.product.id).findAll().deleteAllFromRealm();
-            }
-        });
+        Realm.getDefaultInstance().executeTransaction(realm -> realm.where(CartItem.class).equalTo("product.id", cartItem.product.id).findAll().deleteAllFromRealm());
     }
 
     public static void clearCart() {

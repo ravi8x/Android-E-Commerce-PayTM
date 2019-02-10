@@ -31,7 +31,7 @@ public class SplashActivity extends BaseActivity {
 
         setContentView(R.layout.activity_splash);
 
-        if (!TextUtils.isEmpty(AppPref.getInstance().getAuthToken())) {
+        if (TextUtils.isEmpty(AppPref.getInstance().getAuthToken())) {
             // user token is not present, take him to login screen
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
