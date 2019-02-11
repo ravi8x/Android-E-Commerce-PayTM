@@ -23,7 +23,7 @@
     <string name="msg_fill_the_form">Please fill the form!</string>
     <string name="lbl_create_account">Don\'t have an account? Sign Up here.</string>
     <string name="lbl_existing_account">Already have an account? Login here</string>
-    <string name="msg_unknown">Unknown error occurred! Please try again.</string>
+    <string name="msg_unknown">Unknown error occurred! Please try again. Check Android Studio\'s LogCat for detailed error report.</string>
     <string name="error">Error</string>
     <string name="msg_preparing_order">Preparing your order</string>
     <string name="msg_fetching_checksum">Getting checksum value from the server</string>

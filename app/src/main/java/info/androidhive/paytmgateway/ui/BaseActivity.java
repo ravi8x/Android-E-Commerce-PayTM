@@ -50,6 +50,10 @@ public class BaseActivity extends AppCompatActivity {
         showErrorDialog(getString(R.string.msg_unknown));
     }
 
+    public void handleUnknownError() {
+        showErrorDialog(getString(R.string.msg_unknown));
+    }
+
     public void handleError(ResponseBody responseBody) {
         String message = null;
         if (responseBody != null) {
@@ -96,6 +100,13 @@ public class BaseActivity extends AppCompatActivity {
 
     public void launchSplash(Activity activity) {
         Intent intent = new Intent(activity, SplashActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    public void launchLogin(Activity activity) {
+        Intent intent = new Intent(activity, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

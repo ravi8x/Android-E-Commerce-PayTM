@@ -23,6 +23,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import info.androidhive.paytmgateway.BuildConfig;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.Constants;
 import info.androidhive.paytmgateway.db.AppDatabase;
@@ -112,8 +113,9 @@ public class PayTMActivity extends BaseActivity {
     }
 
     /**
-     *
-     * */
+     * Step1: Sending all the cart items to server and receiving the
+     * unique order id that needs to be sent to PayTM
+     */
     private void prepareOrder() {
         setStatus(R.string.msg_preparing_order);
 
@@ -134,28 +136,34 @@ public class PayTMActivity extends BaseActivity {
             @Override
             public void onResponse(Call<PrepareOrderResponse> call, Response<PrepareOrderResponse> response) {
                 if (!response.isSuccessful()) {
-                    Timber.e("prepareOrder not successful!");
+                    Timber.e("Network call failed");
+                    handleUnknownError();
                     return;
                 }
 
-                Timber.e("prepareOrder response: %s", response.body());
                 getChecksum(response.body());
             }
 
             @Override
             public void onFailure(Call<PrepareOrderResponse> call, Throwable t) {
-                Timber.e("prepareOrder onFailure %s", t.getMessage());
+                handleError(t);
             }
         });
     }
 
+    /**
+     * Step2:
+     * Sending the params to server to generate the Checksum
+     * that needs to be sent to PayTM
+     */
     void getChecksum(PrepareOrderResponse response) {
         setStatus(R.string.msg_fetching_checksum);
 
         if (appConfig == null) {
-            // TODO config is null
-            // handle this error
-            Timber.e("App config is null! Can't place the order");
+            Timber.e("App config is null! Can't place the order. This usually shouldn\'t happen");
+            // navigating user to login screen
+            launchLogin(PayTMActivity.this);
+            finish();
             return;
         }
 
@@ -166,28 +174,28 @@ public class PayTMActivity extends BaseActivity {
             @Override
             public void onResponse(Call<ChecksumResponse> call, Response<ChecksumResponse> response) {
                 if (!response.isSuccessful()) {
-                    // TODO - handle error
+                    Timber.e("Network call failed");
+                    handleUnknownError();
                     return;
                 }
 
-                Timber.e("Checksum: " + response.body().checksum);
+                Timber.d("Checksum Received: " + response.body().checksum);
 
+                // Add the checksum to existing params list and send them to PayTM
                 paramMap.put("CHECKSUMHASH", response.body().checksum);
                 placeOrder(paramMap);
             }
 
             @Override
             public void onFailure(Call<ChecksumResponse> call, Throwable t) {
-                // TODO - handle error
-                Timber.e("checksum onFailure %s", t.getMessage());
+                handleError(t);
             }
         });
     }
 
     public Map<String, String> preparePayTmParams(PrepareOrderResponse response) {
         Map<String, String> paramMap = new HashMap<String, String>();
-        // TODO - configure staging url
-        paramMap.put("CALLBACK_URL", "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=" + response.orderId);
+        paramMap.put("CALLBACK_URL", String.format(BuildConfig.PAYTM_CALLBACK_URL, response.orderId));
         paramMap.put("CHANNEL_ID", appConfig.getChannel());
         paramMap.put("CUST_ID", "CUSTOMER_" + user.id);
         paramMap.put("INDUSTRY_TYPE_ID", appConfig.getIndustryType());
@@ -198,18 +206,18 @@ public class PayTMActivity extends BaseActivity {
         return paramMap;
     }
 
+
+    /**
+     * Step3: Redirecting to PayTM gateway with necessary params along with checksum
+     * This will redirect to PayTM gateway and gives us the PayTM transaction response
+     */
     public void placeOrder(Map<String, String> params) {
         setStatus(R.string.msg_redirecting_to_paytm);
 
+        // choosing between PayTM staging and production
+        PaytmPGService pgService = BuildConfig.IS_PATM_STAGIN ? PaytmPGService.getStagingService() : PaytmPGService.getProductionService();
 
-        // TODO - decide on staging or prod
-        // PaytmPGService.getProductionService()
-        PaytmPGService pgService = PaytmPGService.getStagingService();
         PaytmOrder Order = new PaytmOrder(params);
-
-		/*PaytmMerchant Merchant = new PaytmMerchant(
-				"https://pguat.paytm.com/paytmchecksum/paytmCheckSumGenerator.jsp",
-				"https://pguat.paytm.com/paytmchecksum/paytmCheckSumVerify.jsp");*/
 
         pgService.initialize(Order, null);
 
@@ -218,6 +226,7 @@ public class PayTMActivity extends BaseActivity {
                     @Override
                     public void someUIErrorOccurred(String inErrorMessage) {
                         Timber.e("someUIErrorOccurred: %s", inErrorMessage);
+                        finish();
                         // Some UI Error Occurred in Payment Gateway Activity.
                         // // This may be due to initialization of views in
                         // Payment Gateway Activity or may be due to //
@@ -225,42 +234,17 @@ public class PayTMActivity extends BaseActivity {
                         // the error occurred.
                     }
 
-					/*@Override
-					public void onTransactionSuccess(Bundle inResponse) {
-						// After successful transaction this method gets called.
-						// // Response bundle contains the merchant response
-						// parameters.
-						Log.d("LOG", "Payment Transaction is successful " + inResponse);
-						Toast.makeText(getApplicationContext(), "Payment Transaction is successful ", Toast.LENGTH_LONG).show();
-					}
-
-					@Override
-					public void onTransactionFailure(String inErrorMessage,
-							Bundle inResponse) {
-						// This method gets called if transaction failed. //
-						// Here in this case transaction is completed, but with
-						// a failure. // Error Message describes the reason for
-						// failure. // Response bundle contains the merchant
-						// response parameters.
-						Log.d("LOG", "Payment Transaction Failed " + inErrorMessage);
-						Toast.makeText(getBaseContext(), "Payment Transaction Failed ", Toast.LENGTH_LONG).show();
-					}*/
-
                     @Override
                     public void onTransactionResponse(Bundle inResponse) {
-                        Timber.e("onTransactionResponse: %s", inResponse.toString());
-
-                        String checkSum = inResponse.getString("CHECKSUMHASH");
+                        Timber.d("PayTM Transaction Response: %s", inResponse.toString());
                         String orderId = inResponse.getString("ORDERID");
-                        Timber.e("onTransactionResponse CHECKSUMHASH: %s", checkSum);
-                        // Toast.makeText(getApplicationContext(), "Payment Transaction response " + inResponse.toString(), Toast.LENGTH_LONG).show();
-                        // verifyCheckSum(checkSum);
                         verifyTransactionStatus(orderId);
                     }
 
                     @Override
                     public void networkNotAvailable() { // If network is not
                         Timber.e("networkNotAvailable");
+                        finish();
                         // available, then this
                         // method gets called.
                     }
@@ -268,6 +252,7 @@ public class PayTMActivity extends BaseActivity {
                     @Override
                     public void clientAuthenticationFailed(String inErrorMessage) {
                         Timber.e("clientAuthenticationFailed: %s", inErrorMessage);
+                        finish();
                         // This method gets called if client authentication
                         // failed. // Failure may be due to following reasons //
                         // 1. Server error or downtime. // 2. Server unable to
@@ -281,10 +266,10 @@ public class PayTMActivity extends BaseActivity {
                     public void onErrorLoadingWebPage(int iniErrorCode,
                                                       String inErrorMessage, String inFailingUrl) {
                         Timber.e("onErrorLoadingWebPage: %d | %s | %s", iniErrorCode, inErrorMessage, inFailingUrl);
+                        finish();
 
                     }
 
-                    // had to be added: NOTE
                     @Override
                     public void onBackPressedCancelTransaction() {
                         Toast.makeText(PayTMActivity.this, "Back pressed. Transaction cancelled", Toast.LENGTH_LONG).show();
@@ -294,34 +279,39 @@ public class PayTMActivity extends BaseActivity {
                     @Override
                     public void onTransactionCancel(String inErrorMessage, Bundle inResponse) {
                         Timber.e("onTransactionCancel: %s | %s", inErrorMessage, inResponse);
+                        finish();
                     }
-
                 });
     }
 
+    /**
+     * Step4: Verifying the transaction status once PayTM transaction is over
+     * This makes server(own) -> server(PayTM) call to verify the transaction status
+     */
     private void verifyTransactionStatus(String orderId) {
         setStatus(R.string.msg_verifying_status);
         getApi().checkTransactionStatus(orderId).enqueue(new Callback<OrderResponse>() {
             @Override
             public void onResponse(Call<OrderResponse> call, Response<OrderResponse> response) {
                 if (!response.isSuccessful()) {
-                    // TODO - handle response
+                    Timber.e("Network call failed");
+                    handleUnknownError();
                     return;
                 }
-
-                Timber.e("Order: " + response.body().status);
 
                 showOrderStatus(response.body().status.equalsIgnoreCase(Constants.ORDER_STATUS_COMPLETED));
             }
 
             @Override
             public void onFailure(Call<OrderResponse> call, Throwable t) {
-                // TODO - handle error
-                Timber.e("checksum onFailure %s", t.getMessage());
+                handleError(t);
             }
         });
     }
 
+    /*
+     * Displaying Order Status on UI. This toggles UI between success and failed cases
+     * */
     private void showOrderStatus(boolean isSuccess) {
         loader.setVisibility(View.GONE);
         lblStatus.setVisibility(View.GONE);

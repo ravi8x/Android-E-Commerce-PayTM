@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import java.util.concurrent.TimeUnit;
 
+import info.androidhive.paytmgateway.BuildConfig;
 import info.androidhive.paytmgateway.app.Constants;
 import info.androidhive.paytmgateway.db.AppPref;
 import okhttp3.OkHttpClient;
@@ -25,7 +26,7 @@ public class ApiService {
 
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl(Constants.BASE_URL)
+                    .baseUrl(BuildConfig.BASE_URL)
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
