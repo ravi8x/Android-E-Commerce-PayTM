@@ -32,7 +32,7 @@ import info.androidhive.paytmgateway.db.model.User;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.ChecksumResponse;
 import info.androidhive.paytmgateway.networking.model.OrderItem;
-import info.androidhive.paytmgateway.networking.model.OrderResponse;
+import info.androidhive.paytmgateway.networking.model.Order;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.ui.BaseActivity;
@@ -290,9 +290,9 @@ public class PayTMActivity extends BaseActivity {
      */
     private void verifyTransactionStatus(String orderId) {
         setStatus(R.string.msg_verifying_status);
-        getApi().checkTransactionStatus(orderId).enqueue(new Callback<OrderResponse>() {
+        getApi().checkTransactionStatus(orderId).enqueue(new Callback<Order>() {
             @Override
-            public void onResponse(Call<OrderResponse> call, Response<OrderResponse> response) {
+            public void onResponse(Call<Order> call, Response<Order> response) {
                 if (!response.isSuccessful()) {
                     Timber.e("Network call failed");
                     handleUnknownError();
@@ -303,7 +303,7 @@ public class PayTMActivity extends BaseActivity {
             }
 
             @Override
-            public void onFailure(Call<OrderResponse> call, Throwable t) {
+            public void onFailure(Call<Order> call, Throwable t) {
                 handleError(t);
             }
         });
