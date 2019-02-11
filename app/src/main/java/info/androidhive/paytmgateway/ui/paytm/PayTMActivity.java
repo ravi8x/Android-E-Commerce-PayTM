@@ -195,13 +195,13 @@ public class PayTMActivity extends BaseActivity {
 
     public Map<String, String> preparePayTmParams(PrepareOrderResponse response) {
         Map<String, String> paramMap = new HashMap<String, String>();
-        paramMap.put("CALLBACK_URL", String.format(BuildConfig.PAYTM_CALLBACK_URL, response.orderId));
+        paramMap.put("CALLBACK_URL", String.format(BuildConfig.PAYTM_CALLBACK_URL, response.orderGatewayId));
         paramMap.put("CHANNEL_ID", appConfig.getChannel());
         paramMap.put("CUST_ID", "CUSTOMER_" + user.id);
         paramMap.put("INDUSTRY_TYPE_ID", appConfig.getIndustryType());
         paramMap.put("MID", appConfig.getMerchantId());
         paramMap.put("WEBSITE", appConfig.getWebsite());
-        paramMap.put("ORDER_ID", response.orderId);
+        paramMap.put("ORDER_ID", response.orderGatewayId);
         paramMap.put("TXN_AMOUNT", response.amount);
         return paramMap;
     }

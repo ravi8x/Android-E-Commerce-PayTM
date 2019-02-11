@@ -5,8 +5,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class PrepareOrderResponse {
-    @SerializedName("order_id")
-    public String orderId;
+    public long id;
+
+    @SerializedName("order_gateway_id")
+    public String orderGatewayId;
 
     @SerializedName("amount")
     public String amount;

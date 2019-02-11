@@ -36,7 +36,7 @@ public interface ApiClient {
 
     @FormUrlEncoded
     @POST("transactionStatus")
-    Call<OrderResponse> checkTransactionStatus(@Field("order_id") String orderId);
+    Call<OrderResponse> checkTransactionStatus(@Field("order_gateway_id") String orderId);
 
     @GET("products")
     Call<List<Product>> getProducts();

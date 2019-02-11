@@ -46,7 +46,7 @@ android {
     flavorDimensions "tier"
     productFlavors {
         dev {
-            buildConfigField "String", "BASE_URL", "\"https://c3d2ab1c.ngrok.io/api/\""
+            buildConfigField "String", "BASE_URL", "\"https://3d4003b3.ngrok.io/api/\""
             buildConfigField "String", "PAYTM_CALLBACK_URL", "\"https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=%s\""
             buildConfigField "boolean", "IS_PATM_STAGIN", "true"
         }
