@@ -52,8 +52,10 @@ public class OrderItemsListView extends LinearLayout {
         layoutContainer.removeAllViews();
         for (OrderItem item : items) {
             View view = inflater.inflate(R.layout.view_order_items_list_row, null);
-            ((TextView) view.findViewById(R.id.name)).setText(item.product.name);
-            ((TextView) view.findViewById(R.id.price)).setText(getContext().getString(R.string.price_with_currency, item.product.price));
+            if (item.product != null) {
+                ((TextView) view.findViewById(R.id.name)).setText(item.product.name);
+                ((TextView) view.findViewById(R.id.price)).setText(getContext().getString(R.string.price_with_currency, item.product.price));
+            }
             layoutContainer.addView(view);
         }
     }
