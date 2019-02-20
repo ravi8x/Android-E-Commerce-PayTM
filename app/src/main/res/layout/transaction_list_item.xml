@@ -61,8 +61,7 @@
         android:layout_marginTop="@dimen/activity_margin_half"
         android:gravity="end"
         android:lineSpacingExtra="6sp"
-        android:text="₹12,040"
-        android:textColor="#434343"
-        android:textSize="18sp" />
+        android:textColor="@color/list_product_name"
+        android:textSize="@dimen/price_with_label" />
 
 </RelativeLayout>

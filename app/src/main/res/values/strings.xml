@@ -3,6 +3,7 @@
     <string name="refresh">Refresh</string>
     <string name="price_with_currency">₹%.2f</string>
     <string name="price_with_currency_string">₹%s</string>
+    <string name="total_price_with_currency_string">Total: ₹%s</string>
     <string name="lbl_view_cart">VIEW CART</string>
     <string name="cart_info_bar_data">%d Items | ₹%s</string>
     <string name="clear_cart">Clear Cart</string>

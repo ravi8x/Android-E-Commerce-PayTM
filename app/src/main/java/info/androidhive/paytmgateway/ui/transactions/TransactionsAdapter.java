@@ -52,7 +52,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                 viewHolder.orderStatus.setBackgroundColor(ContextCompat.getColor(context, R.color.red_dull));
             }
 
-            viewHolder.price.setText(context.getString(R.string.price_with_currency_string, transaction.order.amount));
+            viewHolder.price.setText(context.getString(R.string.total_price_with_currency_string, transaction.order.amount));
         }
 
         viewHolder.timestamp.setText(Utils.getOrderTimestamp(transaction.created_at));
