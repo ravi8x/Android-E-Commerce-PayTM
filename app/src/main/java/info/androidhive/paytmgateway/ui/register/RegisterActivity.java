@@ -3,6 +3,7 @@ package info.androidhive.paytmgateway.ui.register;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -40,12 +41,16 @@ public class RegisterActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
+        makeFullScreen();
         setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
-        changeStatusBarColor();
+        changeStatusBarColor(ContextCompat.getColor(this, R.color.colorAccent));
+        hideToolbar();
+    }
+
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_register;
     }
 
     @OnClick(R.id.btn_register)
@@ -64,24 +69,25 @@ public class RegisterActivity extends BaseActivity {
         request.name = name;
         request.email = email;
         request.password = password;
+        request.confirmPassword = password;
         getApi().register(request).enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 loader.setVisibility(View.INVISIBLE);
                 if (!response.isSuccessful()) {
-                    // TODO - handle error
+                    handleError(response.errorBody());
                     return;
                 }
 
                 AppDatabase.saveUser(response.body());
                 AppPref.getInstance().saveAuthToken(response.body().token);
-
                 launchSplash(RegisterActivity.this);
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 loader.setVisibility(View.INVISIBLE);
+                handleError(t);
             }
         });
     }

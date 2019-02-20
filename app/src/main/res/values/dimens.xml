@@ -19,8 +19,9 @@
     <dimen name="logo_margin_top">60dp</dimen>
     <dimen name="login_field_height">40dp</dimen>
     <dimen name="dimen_80">80dp</dimen>
-    <dimen name="corner_radius_form_input">6dp</dimen>
+    <dimen name="corner_radius_form_input">3dp</dimen>
     <dimen name="logo_width_form">80dp</dimen>
     <dimen name="lbl_processing_transaction">16dp</dimen>
     <dimen name="lbl_order_status">20sp</dimen>
+    <dimen name="dimen_4dp">4dp</dimen>
 </resources>

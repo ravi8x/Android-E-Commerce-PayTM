@@ -31,12 +31,12 @@ import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.db.model.User;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.ChecksumResponse;
-import info.androidhive.paytmgateway.networking.model.OrderItem;
 import info.androidhive.paytmgateway.networking.model.Order;
+import info.androidhive.paytmgateway.networking.model.OrderItem;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.ui.BaseActivity;
-import info.androidhive.paytmgateway.ui.orders.OrdersActivity;
+import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
 import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -91,8 +91,12 @@ public class PayTMActivity extends BaseActivity {
         setToolbar();
         enableToolbarUpNavigation();
         getSupportActionBar().setTitle(getString(R.string.title_preparing_order));
-
         init();
+    }
+
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_pay_tm;
     }
 
     private void init() {
@@ -126,7 +130,6 @@ public class PayTMActivity extends BaseActivity {
             OrderItem orderItem = new OrderItem();
             orderItem.productId = cartItem.product.id;
             orderItem.quantity = cartItem.quantity;
-
             orderItems.add(orderItem);
         }
 
@@ -335,7 +338,7 @@ public class PayTMActivity extends BaseActivity {
 
     @OnClick(R.id.btn_check_orders)
     void onOrdersClick() {
-        startActivity(new Intent(PayTMActivity.this, OrdersActivity.class));
+        startActivity(new Intent(PayTMActivity.this, TransactionsActivity.class));
         finish();
     }
 

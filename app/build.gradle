@@ -37,6 +37,10 @@ android {
         exclude 'LICENSE.txt'
     }
 
+    dataBinding {
+        enabled = true
+    }
+
     applicationVariants.all { variant ->
         variant.outputs.all {
             outputFileName = "${rootProject.appName}-${variant.name}-v${variant.versionName}.apk"
@@ -46,7 +50,7 @@ android {
     flavorDimensions "tier"
     productFlavors {
         dev {
-            buildConfigField "String", "BASE_URL", "\"https://3d4003b3.ngrok.io/api/\""
+            buildConfigField "String", "BASE_URL", "\"https://30d08225.ngrok.io/api/\""
             buildConfigField "String", "PAYTM_CALLBACK_URL", "\"https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=%s\""
             buildConfigField "boolean", "IS_PATM_STAGIN", "true"
         }

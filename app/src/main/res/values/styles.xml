@@ -56,13 +56,17 @@
 
     <style name="ButtonBlack" parent="Widget.AppCompat.Button.Colored">
         <item name="colorButtonNormal">@android:color/black</item>
-        <item name="android:minHeight">0dp</item>
+        <!--<item name="android:minHeight">0dp</item>-->
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:layout_height">60dp</item>
+        <!--<item name="android:layout_height">60dp</item>-->
     </style>
 
     <style name="AlertDialog" parent="@android:style/Theme.Dialog">
         <item name="colorAccent">@android:color/black</item>
         <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="LinearProgress" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/colorGreen</item>
     </style>
 </resources>

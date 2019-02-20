@@ -1,16 +1,10 @@
 package info.androidhive.paytmgateway.ui.transactions;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,19 +40,26 @@ public class TransactionsActivity extends BaseActivity {
         fetchTransactions();
     }
 
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_transactions;
+    }
+
     private void init() {
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
-        mAdapter = new TransactionsAdapter(transactions);
+        mAdapter = new TransactionsAdapter(this, transactions);
         recyclerView.setAdapter(mAdapter);
     }
 
     private void fetchTransactions() {
+        toggleProgress(true);
         getApi().getTransactions().enqueue(new Callback<List<Transaction>>() {
             @Override
             public void onResponse(Call<List<Transaction>> call, Response<List<Transaction>> response) {
+                toggleProgress(false);
                 if (!response.isSuccessful()) {
                     handleUnknownError();
                     return;
@@ -71,6 +72,7 @@ public class TransactionsActivity extends BaseActivity {
 
             @Override
             public void onFailure(Call<List<Transaction>> call, Throwable t) {
+                toggleProgress(false);
                 handleError(t);
             }
         });

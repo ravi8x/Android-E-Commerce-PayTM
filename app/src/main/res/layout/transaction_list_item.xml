@@ -1,12 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="@dimen/activity_margin">
 
     <TextView
-        android:id="@+id/status"
-        android:padding="@dimen/activity_margin"
+        android:id="@+id/order_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:lineSpacingExtra="1sp"
+        android:text="Order Id #839 "
+        android:textColor="#5b5b5b"
+        android:textSize="10sp"
+        android:textStyle="normal" />
+
+    <TextView
+        android:id="@+id/timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:fontFamily="sans-serif"
+        android:gravity="end"
+        android:lineSpacingExtra="1sp"
+        android:text="12th, Sep 2018"
+        android:textColor="#5b5b5b"
+        android:textSize="10sp"
+        android:textStyle="normal" />
+
+    <info.androidhive.paytmgateway.ui.custom.OrderItemsListView
+        android:id="@+id/order_items"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/order_id"
+        android:layout_marginTop="@dimen/activity_margin" />
+
+    <TextView
+        android:id="@+id/order_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/order_items"
+        android:layout_marginTop="@dimen/activity_margin_half"
+        android:background="@color/colorGreen"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingTop="@dimen/dimen_4dp"
+        android:paddingRight="@dimen/activity_margin"
+        android:paddingBottom="@dimen/dimen_4dp"
+        android:text="@string/order_placed"
+        android:textColor="@android:color/white"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/price"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/order_items"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/activity_margin_half"
+        android:gravity="end"
+        android:lineSpacingExtra="6sp"
+        android:text="₹12,040"
+        android:textColor="#434343"
+        android:textSize="18sp" />
 
 </RelativeLayout>

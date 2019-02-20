@@ -1,7 +1,10 @@
 package info.androidhive.paytmgateway.networking.model;
 
-public class OrderItem {
-    public long productId;
+import com.google.gson.annotations.SerializedName;
 
+public class OrderItem {
+    @SerializedName("product_id")
+    public long productId;
     public int quantity;
+    public Product product;
 }

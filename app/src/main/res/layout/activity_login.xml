@@ -33,9 +33,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/logo_container"
-        android:layout_marginLeft="@dimen/activity_margin"
+        android:layout_marginLeft="@dimen/dimen_30"
         android:layout_marginTop="@dimen/logo_margin_top"
-        android:layout_marginRight="@dimen/activity_margin"
+        android:layout_marginRight="@dimen/dimen_30"
         android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
@@ -52,8 +52,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_margin_half"
                 android:background="@null"
-                android:inputType="textEmailAddress"
                 android:hint="@string/hint_email"
+                android:inputType="textEmailAddress"
                 android:paddingLeft="@dimen/activity_margin_half"
                 android:paddingRight="@dimen/activity_margin_half"
                 android:textCursorDrawable="@null" />
@@ -88,8 +88,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_30"
+            android:background="@android:color/black"
             android:text="@string/login"
-            android:theme="@style/ButtonBlack" />
+            android:textColor="@android:color/white" />
 
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/loader"

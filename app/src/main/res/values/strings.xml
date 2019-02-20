@@ -2,6 +2,7 @@
     <string name="app_name">Mart9</string>
     <string name="refresh">Refresh</string>
     <string name="price_with_currency">₹%.2f</string>
+    <string name="price_with_currency_string">₹%s</string>
     <string name="lbl_view_cart">VIEW CART</string>
     <string name="cart_info_bar_data">%d Items | ₹%s</string>
     <string name="clear_cart">Clear Cart</string>
@@ -36,4 +37,7 @@
     <string name="msg_order_placed_failed">Order couldn\'t be placed. Plase contact support.</string>
     <string name="order_failed">ORDER FAILED</string>
     <string name="activity_title_orders">My Orders</string>
+    <string name="order_placed">Order Placed</string>
+    <string name="order_id">Order Id #%d</string>
+    <string name="transaction_failed">Transaction Failed</string>
 </resources>

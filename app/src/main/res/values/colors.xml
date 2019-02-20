@@ -11,6 +11,7 @@
     <color name="bg_separator">#DA707070</color>
     <color name="border_remove_item">#fc9898</color>
     <color name="btn_remove_item">#fc2222</color>
+    <color name="red_dull">#FC5A5A</color>
     <color name="bg_input_form">#FFEB6E</color>
     <color name="hint_label">#4E4E4E</color>
     <color name="grey">#5b5b5b</color>

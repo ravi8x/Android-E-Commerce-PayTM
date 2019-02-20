@@ -1,25 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.transactions.TransactionsActivity">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/dimen_80"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/loader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/activity_margin"
+            app:indicatorColor="@color/colorGreen"
+            app:indicatorName="BallPulseIndicator" />
 
-    </android.support.design.widget.AppBarLayout>
+        <TextView
+            android:id="@+id/lbl_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:paddingLeft="@dimen/activity_margin"
+            android:paddingRight="@dimen/activity_margin"
+            android:text="@string/msg_preparing_order"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/lbl_processing_transaction" />
+    </LinearLayout>
 
-    <include layout="@layout/content_paytm_activity" />
+    <LinearLayout
+        android:id="@+id/layout_order_placed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/dimen_80"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-</android.support.design.widget.CoordinatorLayout>
+        <ImageView
+            android:id="@+id/icon_status"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/baseline_check_black_48" />
+
+        <TextView
+            android:id="@+id/title_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_margin"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center_horizontal"
+            android:lineSpacingExtra="4sp"
+            android:text="@string/thank_you"
+            android:textColor="@color/grey"
+            android:textSize="@dimen/lbl_order_status"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/status_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_margin"
+            android:fontFamily="sans-serif"
+            android:gravity="center_horizontal"
+            android:letterSpacing="0.05"
+            android:lineSpacingExtra="2sp"
+            android:text="Your order placed successfully!"
+            android:textColor="@color/lbl_secondary"
+            android:textSize="14sp"
+            android:textStyle="normal" />
+
+        <TextView
+            android:id="@+id/btn_check_orders"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_30"
+            android:background="@color/colorAccent"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:paddingLeft="@dimen/activity_margin"
+            android:paddingTop="@dimen/activity_margin_half"
+            android:paddingRight="@dimen/activity_margin"
+            android:paddingBottom="@dimen/activity_margin_half"
+            android:text="@string/btn_check_order"
+            android:textColor="@color/gradient_2"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</RelativeLayout>

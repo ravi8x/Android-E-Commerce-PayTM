@@ -55,8 +55,6 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     @BindView(R.id.cart_info_bar)
     CartInfoBar cartInfoBar;
 
-    private PrefManager prefs;
-    private ApiClient apiClient;
     private ProductsAdapter mAdapter;
     private Realm realm;
     private RealmResults<CartItem> cartItems;
@@ -69,6 +67,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         ButterKnife.bind(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        changeStatusBarColor();
 
         init();
         renderProducts();
@@ -94,6 +93,11 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         };
     }
 
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_main;
+    }
+
     private void setCartInfoBar(RealmResults<CartItem> cartItems) {
         int itemCount = 0;
         for (CartItem cartItem : cartItems) {
@@ -110,9 +114,6 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
     }
 
     private void init() {
-        prefs = PrefManager.with(this);
-        apiClient = ApiService.getClient().create(ApiClient.class);
-
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));

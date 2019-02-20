@@ -3,5 +3,6 @@
     <style name="ButtonBlack" parent="Base.Widget.AppCompat.Button">
         <item name="android:colorButtonNormal">@android:color/black</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_height">50dp</item>
     </style>
 </resources>

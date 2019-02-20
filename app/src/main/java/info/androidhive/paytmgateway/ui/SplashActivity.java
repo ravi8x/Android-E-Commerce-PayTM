@@ -44,6 +44,11 @@ public class SplashActivity extends BaseActivity {
         fetchAppConfig();
     }
 
+    @Override
+    public int getLayoutId() {
+        return R.layout.activity_splash;
+    }
+
     private void fetchAppConfig() {
         Call<AppConfig> call = getApi().getAppConfig();
         call.enqueue(new Callback<AppConfig>() {
