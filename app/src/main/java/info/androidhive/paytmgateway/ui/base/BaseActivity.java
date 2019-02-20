@@ -1,7 +1,6 @@
-package info.androidhive.paytmgateway.ui;
+package info.androidhive.paytmgateway.ui.base;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.graphics.Color;
@@ -13,7 +12,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
@@ -34,10 +32,9 @@ import info.androidhive.paytmgateway.networking.ApiClient;
 import info.androidhive.paytmgateway.networking.ApiService;
 import info.androidhive.paytmgateway.db.model.User;
 import info.androidhive.paytmgateway.networking.model.ErrorResponse;
+import info.androidhive.paytmgateway.ui.splash.SplashActivity;
 import info.androidhive.paytmgateway.ui.login.LoginActivity;
-import info.androidhive.paytmgateway.ui.main.MainActivity;
 import okhttp3.ResponseBody;
-import timber.log.Timber;
 
 public abstract class BaseActivity extends AppCompatActivity {
     private static ApiClient mApi;
@@ -63,7 +60,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (mApi == null) {
             mApi = ApiService.getClient().create(ApiClient.class);
         }
-
         return mApi;
     }
 

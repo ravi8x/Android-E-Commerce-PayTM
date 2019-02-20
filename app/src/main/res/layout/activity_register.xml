@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorAccent"
-    tools:context=".ui.SplashActivity">
+    tools:context=".ui.splash.SplashActivity">
 
     <LinearLayout
         android:id="@+id/logo_container"
@@ -106,6 +106,15 @@
 
         </android.support.design.widget.TextInputLayout>
 
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btn_register"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen_30"
+            android:background="@android:color/black"
+            android:text="@string/register"
+            android:textColor="@android:color/white" />
+
         <com.wang.avi.AVLoadingIndicatorView
             android:id="@+id/loader"
             android:layout_width="wrap_content"
@@ -113,19 +122,10 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/activity_margin"
-            android:layout_marginBottom="@dimen/activity_margin"
+            android:layout_marginTop="@dimen/dimen_30"
             android:visibility="invisible"
             app:indicatorColor="@android:color/black"
             app:indicatorName="BallPulseIndicator" />
-
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_register"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/black"
-            android:text="@string/register"
-            android:textColor="@android:color/white" />
     </LinearLayout>
 
     <Button

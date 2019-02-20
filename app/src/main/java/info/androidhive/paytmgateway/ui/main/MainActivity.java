@@ -11,31 +11,17 @@ import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
-
-import com.paytm.pgsdk.PaytmOrder;
-import com.paytm.pgsdk.PaytmPGService;
-import com.paytm.pgsdk.PaytmPaymentTransactionCallback;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
-import info.androidhive.paytmgateway.app.PrefManager;
 import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.db.model.CartItem;
 import info.androidhive.paytmgateway.helper.GridSpacingItemDecoration;
 import info.androidhive.paytmgateway.helper.Utils;
-import info.androidhive.paytmgateway.networking.ApiClient;
-import info.androidhive.paytmgateway.networking.ApiService;
-import info.androidhive.paytmgateway.networking.model.AppConfig;
-import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
 import info.androidhive.paytmgateway.networking.model.Product;
-import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.base.BaseActivity;
 import info.androidhive.paytmgateway.ui.cart.CartBottomSheetFragment;
 import info.androidhive.paytmgateway.ui.login.LoginActivity;
 import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
@@ -43,9 +29,6 @@ import info.androidhive.paytmgateway.ui.views.CartInfoBar;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import timber.log.Timber;
 
 public class MainActivity extends BaseActivity implements ProductsAdapter.ProductsAdapterListener {
@@ -76,12 +59,7 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         cartItems = realm.where(CartItem.class).findAllAsync();
 
         cartRealmChangeListener = cartItems -> {
-            Timber.e("cartItems changed! " + this.cartItems.size());
-
-            for (CartItem c : cartItems) {
-                Timber.e("C: %s | %d", c.product.name, c.quantity);
-            }
-
+            Timber.d("Cart items changed! " + this.cartItems.size());
             if (cartItems != null && cartItems.size() > 0) {
                 setCartInfoBar(cartItems);
                 toggleCartBar(true);
@@ -106,6 +84,9 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         cartInfoBar.setData(itemCount, String.valueOf(Utils.getCartPrice(cartItems)));
     }
 
+    /**
+     * Rendering the products from local db
+     */
     private void renderProducts() {
         RealmResults<Product> products = AppDatabase.getProducts();
         mAdapter = new ProductsAdapter(this, products, this);
@@ -118,7 +99,6 @@ public class MainActivity extends BaseActivity implements ProductsAdapter.Produc
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
         cartInfoBar.setListener(() -> showCart());
     }
 

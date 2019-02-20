@@ -16,7 +16,6 @@ import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.app.Constants;
 import info.androidhive.paytmgateway.helper.Utils;
-import info.androidhive.paytmgateway.networking.model.OrderItem;
 import info.androidhive.paytmgateway.networking.model.Transaction;
 import info.androidhive.paytmgateway.ui.custom.OrderItemsListView;
 
@@ -57,14 +56,6 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         }
 
         viewHolder.timestamp.setText(Utils.getOrderTimestamp(transaction.created_at));
-    }
-
-    private String getTotalAmount(List<OrderItem> items) {
-        float amount = 0f;
-        for (OrderItem item : items) {
-            amount += item.product.price;
-        }
-        return String.valueOf(amount);
     }
 
     @Override

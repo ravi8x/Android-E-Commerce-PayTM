@@ -5,6 +5,8 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import info.androidhive.paytmgateway.R;
 import info.androidhive.paytmgateway.networking.model.Transaction;
-import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.base.BaseActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,6 +24,9 @@ public class TransactionsActivity extends BaseActivity {
 
     @BindView(R.id.recycler_view)
     RecyclerView recyclerView;
+
+    @BindView(R.id.layout_empty_data)
+    LinearLayout layoutEmptyData;
 
     private TransactionsAdapter mAdapter;
     private List<Transaction> transactions = new ArrayList<>();
@@ -32,7 +37,7 @@ public class TransactionsActivity extends BaseActivity {
         setContentView(R.layout.activity_transactions);
         ButterKnife.bind(this);
         setToolbar();
-
+        changeStatusBarColor();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         init();
@@ -68,6 +73,7 @@ public class TransactionsActivity extends BaseActivity {
                 transactions.clear();
                 transactions.addAll(response.body());
                 mAdapter.notifyDataSetChanged();
+                toggleEmptyData();
             }
 
             @Override
@@ -76,6 +82,16 @@ public class TransactionsActivity extends BaseActivity {
                 handleError(t);
             }
         });
+    }
+
+    private void toggleEmptyData() {
+        if (transactions.size() > 0) {
+            layoutEmptyData.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        } else {
+            layoutEmptyData.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        }
     }
 
     @Override

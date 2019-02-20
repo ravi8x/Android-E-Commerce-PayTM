@@ -1,7 +1,6 @@
 package info.androidhive.paytmgateway.ui.register;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -19,7 +18,7 @@ import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.db.model.User;
 import info.androidhive.paytmgateway.networking.model.RegisterRequest;
-import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.base.BaseActivity;
 import info.androidhive.paytmgateway.ui.login.LoginActivity;
 import retrofit2.Call;
 import retrofit2.Callback;

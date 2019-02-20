@@ -35,7 +35,7 @@ import info.androidhive.paytmgateway.networking.model.Order;
 import info.androidhive.paytmgateway.networking.model.OrderItem;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderRequest;
 import info.androidhive.paytmgateway.networking.model.PrepareOrderResponse;
-import info.androidhive.paytmgateway.ui.BaseActivity;
+import info.androidhive.paytmgateway.ui.base.BaseActivity;
 import info.androidhive.paytmgateway.ui.transactions.TransactionsActivity;
 import io.realm.Realm;
 import retrofit2.Call;
@@ -91,6 +91,7 @@ public class PayTMActivity extends BaseActivity {
         setToolbar();
         enableToolbarUpNavigation();
         getSupportActionBar().setTitle(getString(R.string.title_preparing_order));
+        changeStatusBarColor();
         init();
     }
 
@@ -117,7 +118,7 @@ public class PayTMActivity extends BaseActivity {
     }
 
     /**
-     * Step1: Sending all the cart items to server and receiving the
+     * STEP 1: Sending all the cart items to server and receiving the
      * unique order id that needs to be sent to PayTM
      */
     private void prepareOrder() {
@@ -139,8 +140,8 @@ public class PayTMActivity extends BaseActivity {
             @Override
             public void onResponse(Call<PrepareOrderResponse> call, Response<PrepareOrderResponse> response) {
                 if (!response.isSuccessful()) {
-                    Timber.e("Network call failed");
                     handleUnknownError();
+                    showOrderStatus(false);
                     return;
                 }
 
@@ -150,12 +151,13 @@ public class PayTMActivity extends BaseActivity {
             @Override
             public void onFailure(Call<PrepareOrderResponse> call, Throwable t) {
                 handleError(t);
+                showOrderStatus(false);
             }
         });
     }
 
     /**
-     * Step2:
+     * STEP 2:
      * Sending the params to server to generate the Checksum
      * that needs to be sent to PayTM
      */
@@ -171,7 +173,7 @@ public class PayTMActivity extends BaseActivity {
         }
 
         Map<String, String> paramMap = preparePayTmParams(response);
-        Timber.e("PayTm Params: %s", paramMap);
+        Timber.d("PayTm Params: %s", paramMap);
 
         getApi().getCheckSum(paramMap).enqueue(new Callback<ChecksumResponse>() {
             @Override
@@ -179,6 +181,7 @@ public class PayTMActivity extends BaseActivity {
                 if (!response.isSuccessful()) {
                     Timber.e("Network call failed");
                     handleUnknownError();
+                    showOrderStatus(false);
                     return;
                 }
 
@@ -192,6 +195,7 @@ public class PayTMActivity extends BaseActivity {
             @Override
             public void onFailure(Call<ChecksumResponse> call, Throwable t) {
                 handleError(t);
+                showOrderStatus(false);
             }
         });
     }
@@ -211,7 +215,7 @@ public class PayTMActivity extends BaseActivity {
 
 
     /**
-     * Step3: Redirecting to PayTM gateway with necessary params along with checksum
+     * STEP 3: Redirecting to PayTM gateway with necessary params along with checksum
      * This will redirect to PayTM gateway and gives us the PayTM transaction response
      */
     public void placeOrder(Map<String, String> params) {
@@ -270,7 +274,6 @@ public class PayTMActivity extends BaseActivity {
                                                       String inErrorMessage, String inFailingUrl) {
                         Timber.e("onErrorLoadingWebPage: %d | %s | %s", iniErrorCode, inErrorMessage, inFailingUrl);
                         finish();
-
                     }
 
                     @Override
@@ -288,7 +291,7 @@ public class PayTMActivity extends BaseActivity {
     }
 
     /**
-     * Step4: Verifying the transaction status once PayTM transaction is over
+     * STEP 4: Verifying the transaction status once PayTM transaction is over
      * This makes server(own) -> server(PayTM) call to verify the transaction status
      */
     private void verifyTransactionStatus(String orderId) {
@@ -299,6 +302,7 @@ public class PayTMActivity extends BaseActivity {
                 if (!response.isSuccessful()) {
                     Timber.e("Network call failed");
                     handleUnknownError();
+                    showOrderStatus(false);
                     return;
                 }
 
@@ -308,6 +312,7 @@ public class PayTMActivity extends BaseActivity {
             @Override
             public void onFailure(Call<Order> call, Throwable t) {
                 handleError(t);
+                showOrderStatus(false);
             }
         });
     }

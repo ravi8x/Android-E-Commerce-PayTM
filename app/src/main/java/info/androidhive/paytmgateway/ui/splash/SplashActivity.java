@@ -1,8 +1,9 @@
-package info.androidhive.paytmgateway.ui;
+package info.androidhive.paytmgateway.ui.splash;
 
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 
@@ -13,9 +14,9 @@ import info.androidhive.paytmgateway.db.AppDatabase;
 import info.androidhive.paytmgateway.db.AppPref;
 import info.androidhive.paytmgateway.networking.model.AppConfig;
 import info.androidhive.paytmgateway.networking.model.Product;
+import info.androidhive.paytmgateway.ui.base.BaseActivity;
 import info.androidhive.paytmgateway.ui.login.LoginActivity;
 import info.androidhive.paytmgateway.ui.main.MainActivity;
-import info.androidhive.paytmgateway.ui.register.RegisterActivity;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,12 +26,12 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
-        }
-
+        makeFullScreen();
         setContentView(R.layout.activity_splash);
+        changeStatusBarColor(ContextCompat.getColor(this, R.color.colorAccent));
+        hideToolbar();
 
+        // checking for auth token in prefs
         if (TextUtils.isEmpty(AppPref.getInstance().getAuthToken())) {
             // user token is not present, take him to login screen
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
@@ -39,8 +40,6 @@ public class SplashActivity extends BaseActivity {
             finish();
             return;
         }
-
-        changeStatusBarColor();
         fetchAppConfig();
     }
 
@@ -49,6 +48,10 @@ public class SplashActivity extends BaseActivity {
         return R.layout.activity_splash;
     }
 
+    /**
+     * Fetching app configuration from server
+     * This will get PayTM configuration required for payment related operations
+     */
     private void fetchAppConfig() {
         Call<AppConfig> call = getApi().getAppConfig();
         call.enqueue(new Callback<AppConfig>() {
@@ -73,6 +76,9 @@ public class SplashActivity extends BaseActivity {
         });
     }
 
+    /**
+     * Fetching products on splash screen before loading home screen
+     */
     private void fetchProducts() {
         Call<List<Product>> call = getApi().getProducts();
         call.enqueue(new Callback<List<Product>>() {
