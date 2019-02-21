@@ -51,14 +51,6 @@ public class AppDatabase {
      */
     public static void addItemToCart(Product product) {
         initNewCart(product);
-        /*Cart cart = getCart();
-        if (cart == null) {
-            // no cart existed
-            initNewCart(product);
-        } else {
-            // cart already present
-            addProductToCart(cart, product);
-        }*/
     }
 
     private static void initNewCart(Product product) {
@@ -73,37 +65,7 @@ public class AppDatabase {
                 cartItem.quantity += 1;
                 realm.copyToRealmOrUpdate(cartItem);
             }
-            /*
-            List<CartItem> cartItems;
-            Cart cart1 = realm.createObject(Cart.class, 0);
-            CartItem cartItem = new CartItem();
-            cartItem.product = product;
-            cartItem.quantity += 1;
-            cartItems = new ArrayList<>();
-            cartItems.add(cartItem);
-            cart1.cartItems.addAll(cartItems);
-            realm.copyToRealmOrUpdate(cart1);*/
         });
-    }
-
-    private static void addProductToCart(Product product) {
-        initNewCart(product);
-        /*CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
-        if (item != null) {
-            Realm.getDefaultInstance().executeTransaction(realm -> {
-                item.quantity += 1;
-                cart.cartItems.set(cart.cartItems.indexOf(item), item);
-                realm.copyToRealmOrUpdate(cart);
-            });
-        } else {
-            CartItem cartItem = new CartItem();
-            cartItem.product = product;
-            cartItem.quantity += 1;
-            Realm.getDefaultInstance().executeTransaction(realm -> {
-                cart.cartItems.add(cartItem);
-                realm.copyToRealmOrUpdate(cart);
-            });
-        }*/
     }
 
     public static void removeCartItem(Product product) {
@@ -117,31 +79,7 @@ public class AppDatabase {
                     realm.copyToRealmOrUpdate(cartItem);
                 }
             }
-            /*
-            List<CartItem> cartItems;
-            Cart cart1 = realm.createObject(Cart.class, 0);
-            CartItem cartItem = new CartItem();
-            cartItem.product = product;
-            cartItem.quantity += 1;
-            cartItems = new ArrayList<>();
-            cartItems.add(cartItem);
-            cart1.cartItems.addAll(cartItems);
-            realm.copyToRealmOrUpdate(cart1);*/
         });
-        /*Cart cart = getCart();
-        CartItem item = cart.cartItems.where().equalTo("product.id", product.id).findFirst();
-        if (item != null) {
-            Realm.getDefaultInstance().executeTransaction(realm -> {
-                // if the quantity is 1, remove the item
-                if (item.quantity == 1) {
-                    cart.cartItems.remove(cart.cartItems.indexOf(item));
-                } else {
-                    item.quantity -= 1;
-                    cart.cartItems.set(cart.cartItems.indexOf(item), item);
-                }
-                realm.copyToRealmOrUpdate(cart);
-            });
-        }*/
     }
 
     public static void removeCartItem(CartItem cartItem) {
