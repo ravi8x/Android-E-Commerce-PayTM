@@ -1,13 +1,12 @@
 Android E-Commerce app - PayTM Gateway
 ===================
 Android simple e-commerce with PayTM payment gateway integrated.
+| [Tutorial](https://www.androidhive.info/2019/02/android-integrating-paytm-payment-gateway-ecommerce-app/)      |  [Apk](http://download.androidhive.info/apk/mart9-paytm.apk) | [Video Demo](https://www.youtube.com/watch?v=SSgG1t63MjM)|
+|----------|--------|------|
 
 ![Android Ecommerce PayTM integration](https://www.androidhive.info/wp-content/uploads/2019/02/android-e-commerce-app-paytm-integration.png)
 
 ![Android Ecommerce PayTM integration](https://www.androidhive.info/wp-content/uploads/2019/02/android-e-commerce-app-paytm-demo.png)
-
-| [Tutorial](https://www.androidhive.info/2019/02/android-integrating-paytm-payment-gateway-ecommerce-app/)      |  [Apk](http://download.androidhive.info/apk/mart9-paytm.apk) | [Video Demo](https://www.youtube.com/watch?v=SSgG1t63MjM)|
-|----------|--------|------|
 
 Backend REST API
 ===================
